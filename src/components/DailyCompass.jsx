@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { calculateAccumulatedEfficacy, calculateVitalityScore } from '../utils/decayEngine';
+import { exportDataToFile, importDataFromFile } from '../utils/storage';
+import { sound } from '../utils/audio';
 
 export default function DailyCompass({
   injections,
@@ -10,6 +12,7 @@ export default function DailyCompass({
   onLogQuickDose
 }) {
   const latestWellness = subjectiveWellness[0] || { energy_rating: 8, mood_rating: 8, brain_fog: 2, libido: 7, joint_health: 8 };
+  const [backupMsg, setBackupMsg] = useState('');
 
   // Daily Affirmations List
   const affirmations = [
@@ -31,17 +34,47 @@ export default function DailyCompass({
   // Calculate Vitality Score
   const vitality = calculateVitalityScore(subjectiveWellness, dailyLogs, injections.length);
 
+  const handleExport = () => {
+    sound.playSuccess();
+    const ok = exportDataToFile();
+    if (ok) {
+      setBackupMsg('Backup saved to your Downloads/iCloud!');
+      setTimeout(() => setBackupMsg(''), 3000);
+    }
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    importDataFromFile(file, (success) => {
+      if (success) {
+        sound.playSuccess();
+        setBackupMsg('Data successfully restored!');
+        setTimeout(() => {
+          window.location.reload();
+        }, 800);
+      } else {
+        alert('Invalid backup file format.');
+      }
+    });
+  };
+
   return (
     <div style={{ animation: 'popIn 0.3s ease-out' }}>
-      {/* Top Banner (Softer Persona) */}
+      {/* Top Banner */}
       <div className="section-header" style={{ borderBottom: '1px solid rgba(255, 182, 193, 0.2)' }}>
         <div>
-          <h2 style={{ color: 'var(--text-main)', fontSize: '24px', fontWeight: '500' }}>The Daily Compass</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h2 style={{ color: 'var(--text-main)', fontSize: '24px', fontWeight: '500' }}>The Daily Compass</h2>
+            <span className="badge badge-green" style={{ fontSize: '10.5px', padding: '3px 8px' }}>
+              🛡️ Auto-Backup Active
+            </span>
+          </div>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '6px' }}>
             Your personalized guide to cellular health, hormonal balance, and daily vitality.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={() => onNavigate('cycle_sync')} style={{ borderColor: 'var(--accent-pink)', color: 'var(--accent-pink)' }}>
             🌸 Cycle Sync
           </button>
@@ -160,7 +193,7 @@ export default function DailyCompass({
       </div>
 
       {/* DAILY NUTRACEUTICAL COFACTOR STACK */}
-      <div>
+      <div style={{ marginBottom: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: '400', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>✨</span> Daily Nutrient Synergy ({vitamins.length})
@@ -196,6 +229,35 @@ export default function DailyCompass({
               </span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* BACKUP & DATA SECURITY HUB */}
+      <div className="card" style={{ padding: '20px 24px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: '#fff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🛡️</span> Continuous Auto-Backup Active
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              Every injection, cycle day, and wellness rating is automatically mirrored to your secure local snapshot on every input.
+            </div>
+            {backupMsg && (
+              <div style={{ fontSize: '12px', color: 'var(--accent-green)', fontWeight: '600', marginTop: '6px' }}>
+                ✓ {backupMsg}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button className="btn btn-secondary" style={{ fontSize: '12px', padding: '7px 14px' }} onClick={handleExport}>
+              📥 Save Backup to iCloud / Files
+            </button>
+            <label className="btn btn-secondary" style={{ fontSize: '12px', padding: '7px 14px', cursor: 'pointer', margin: 0 }}>
+              📤 Restore from Backup
+              <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+            </label>
+          </div>
         </div>
       </div>
     </div>

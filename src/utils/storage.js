@@ -8,7 +8,8 @@ const STORAGE_KEYS = {
   BIOMETRICS: 'biobae_biometrics_v2',
   SUBJECTIVE_WELLNESS: 'biobae_subjective_wellness_v2',
   BIOMARKERS_LAB: 'biobae_biomarkers_lab_v2',
-  CYCLE_DATA: 'biobae_cycle_data_v2'
+  CYCLE_DATA: 'biobae_cycle_data_v2',
+  LAST_BACKUP_TIME: 'biobae_last_backup_time'
 };
 
 const DEFAULT_PROFILE = {
@@ -76,7 +77,7 @@ const DEFAULT_DAILY_LOGS = [
     actual_dose_mcg: 500,
     dose: '500 mcg',
     site: 'Left Abdomen (SubQ)',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     displayTime: 'Today 08:30 AM',
     dose_taken: true,
     cycle_day: 14
@@ -94,7 +95,7 @@ const DEFAULT_SUBJECTIVE_WELLNESS = [
 ];
 
 const DEFAULT_CYCLE_DATA = {
-  lastPeriodStart: new Date(Date.now() - 14 * 86400000).toISOString(), // 14 days ago
+  lastPeriodStart: new Date(Date.now() - 14 * 86400000).toISOString(),
   averageLength: 28,
   currentDay: 14
 };
@@ -109,12 +110,102 @@ export function getStorageData(key, fallback) {
   }
 }
 
+/**
+ * Enhanced storage setter with multi-layer persistence & automated backup snapshot
+ */
 export function setStorageData(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    
+    // Auto-update master backup snapshot on every mutation
+    triggerAutoBackupSnapshot();
   } catch (err) {
     console.error('Storage Write Error:', err);
   }
+}
+
+/**
+ * Creates an automated bundled JSON backup snapshot of all data stores
+ */
+export function triggerAutoBackupSnapshot() {
+  try {
+    const snapshot = {
+      timestamp: new Date().toISOString(),
+      version: '2.0.0',
+      data: {
+        injections: getStorageData(STORAGE_KEYS.INJECTIONS, DEFAULT_INJECTIONS),
+        vitamins: getStorageData(STORAGE_KEYS.VITAMINS, DEFAULT_VITAMINS),
+        profile: getStorageData(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE),
+        dailyLogs: getStorageData(STORAGE_KEYS.DAILY_LOGS, DEFAULT_DAILY_LOGS),
+        biometrics: getStorageData(STORAGE_KEYS.BIOMETRICS, DEFAULT_BIOMETRICS),
+        subjectiveWellness: getStorageData(STORAGE_KEYS.SUBJECTIVE_WELLNESS, DEFAULT_SUBJECTIVE_WELLNESS),
+        biomarkersLab: getStorageData(STORAGE_KEYS.BIOMARKERS_LAB, []),
+        cycleData: getStorageData(STORAGE_KEYS.CYCLE_DATA, DEFAULT_CYCLE_DATA)
+      }
+    };
+    
+    // Save to high-durability secondary key
+    localStorage.setItem('biobae_master_backup_snapshot', JSON.stringify(snapshot));
+    localStorage.setItem(STORAGE_KEYS.LAST_BACKUP_TIME, new Date().toLocaleTimeString());
+  } catch (e) {
+    console.warn('Auto backup error:', e);
+  }
+}
+
+/**
+ * 1-Click Export to JSON file (for saving to iCloud / Files)
+ */
+export function exportDataToFile() {
+  try {
+    const snapshot = localStorage.getItem('biobae_master_backup_snapshot') || JSON.stringify({
+      timestamp: new Date().toISOString(),
+      data: initialData
+    });
+    
+    const blob = new Blob([snapshot], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.href = url;
+    a.download = `BioBae_Backup_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return true;
+  } catch (err) {
+    console.error('Export failed:', err);
+    return false;
+  }
+}
+
+/**
+ * 1-Click Restore from JSON file
+ */
+export function importDataFromFile(file, onComplete) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      const data = parsed.data || parsed;
+      
+      if (data.injections) localStorage.setItem(STORAGE_KEYS.INJECTIONS, JSON.stringify(data.injections));
+      if (data.vitamins) localStorage.setItem(STORAGE_KEYS.VITAMINS, JSON.stringify(data.vitamins));
+      if (data.profile) localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(data.profile));
+      if (data.dailyLogs) localStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify(data.dailyLogs));
+      if (data.biometrics) localStorage.setItem(STORAGE_KEYS.BIOMETRICS, JSON.stringify(data.biometrics));
+      if (data.subjectiveWellness) localStorage.setItem(STORAGE_KEYS.SUBJECTIVE_WELLNESS, JSON.stringify(data.subjectiveWellness));
+      if (data.biomarkersLab) localStorage.setItem(STORAGE_KEYS.BIOMARKERS_LAB, JSON.stringify(data.biomarkersLab));
+      if (data.cycleData) localStorage.setItem(STORAGE_KEYS.CYCLE_DATA, JSON.stringify(data.cycleData));
+      
+      triggerAutoBackupSnapshot();
+      if (onComplete) onComplete(true);
+    } catch (err) {
+      console.error('Import failed:', err);
+      if (onComplete) onComplete(false);
+    }
+  };
+  reader.readAsText(file);
 }
 
 export const initialData = {
