@@ -47,12 +47,14 @@ body {
   background-image: 
     radial-gradient(circle at 10% 10%, rgba(0, 242, 254, 0.06) 0%, transparent 40%),
     radial-gradient(circle at 90% 90%, rgba(255, 42, 109, 0.05) 0%, transparent 40%);
+  overflow-x: hidden;
 }
 
 /* App Shell */
 .app-container {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
 
 /* Sidebar */
@@ -68,6 +70,7 @@ body {
   top: 0;
   height: 100vh;
   flex-shrink: 0;
+  z-index: 100;
 }
 
 .brand-header {
@@ -162,63 +165,45 @@ body {
   width: 100%;
 }
 
-@media (max-width: 768px) {
-  .app-container {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    padding: 16px;
-  }
-  .nav-links {
-    flex-direction: row;
-    overflow-x: auto;
-    padding-bottom: 8px;
-  }
-  .nav-item {
-    white-space: nowrap;
-  }
-  .main-wrapper {
-    padding: 20px 16px 80px 16px;
-  }
-}
-
-/* Common Header */
+/* Section Header */
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 24px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .section-header h2 {
   font-size: 26px;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: #fff;
 }
 
 .section-header p {
+  font-size: 14px;
   color: var(--text-muted);
-  font-size: 13.5px;
   margin-top: 4px;
 }
 
-/* Clean Cards */
+/* Cards & Surfaces */
 .card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
   margin-bottom: 16px;
-  transition: border-color 0.2s, transform 0.2s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  backdrop-filter: blur(12px);
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 /* Buttons */
@@ -233,48 +218,55 @@ body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
-  border: none;
+  border: 1px solid transparent;
   font-family: var(--font);
 }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-cyan), #00b4d8);
-  color: #04060a;
-  box-shadow: 0 4px 14px rgba(0, 242, 254, 0.25);
+  color: #000;
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
 }
+
 .btn-primary:hover {
+  filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0, 242, 254, 0.4);
 }
 
 .btn-secondary {
   background: var(--bg-subtle);
-  border: 1px solid var(--border);
+  border-color: var(--border);
   color: var(--text-main);
 }
+
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
 }
 
 .btn-danger {
   background: rgba(255, 42, 109, 0.12);
-  border: 1px solid rgba(255, 42, 109, 0.3);
+  border-color: rgba(255, 42, 109, 0.25);
   color: var(--accent-pink);
 }
+
 .btn-danger:hover {
-  background: rgba(255, 42, 109, 0.25);
+  background: rgba(255, 42, 109, 0.2);
 }
 
-/* Simple Inputs */
+/* Forms & Inputs */
+.input-group {
+  margin-bottom: 14px;
+}
+
 .input-label {
   display: block;
   font-size: 12px;
   font-weight: 700;
   color: var(--text-muted);
-  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  margin-bottom: 6px;
 }
 
 .input-field, .select-field {
@@ -343,3 +335,105 @@ body {
 .badge-green { color: var(--accent-green); border-color: rgba(181, 234, 234, 0.2); background: rgba(181, 234, 234, 0.1); }
 .badge-purple { color: var(--accent-purple); border-color: rgba(226, 194, 255, 0.2); background: rgba(226, 194, 255, 0.1); }
 .badge-pink { color: var(--accent-pink); border-color: rgba(255, 182, 193, 0.2); background: rgba(255, 182, 193, 0.1); }
+
+/* ============================================================
+   📱 ADVANCED MOBILE & RESPONSIVE LAYOUT SYSTEM
+   ============================================================ */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 16px 14px 10px 14px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(25px);
+  }
+
+  .brand-header {
+    padding: 4px 6px 14px 6px;
+    margin-bottom: 10px;
+  }
+
+  .nav-links {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 9px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+  }
+
+  .nav-item.active {
+    background: rgba(255, 182, 193, 0.15);
+    border-color: var(--accent-pink);
+    color: #fff;
+  }
+
+  .sidebar-bottom {
+    display: none; /* Hide footer clutter on mobile header */
+  }
+
+  .main-wrapper {
+    padding: 16px 14px 60px 14px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+  }
+
+  .section-header p {
+    font-size: 13px;
+  }
+
+  /* Force multi-column grids to stack smoothly on mobile */
+  div[style*="gridTemplateColumns: 1.2fr 1fr"],
+  div[style*="gridTemplateColumns: 1fr 1fr"],
+  div[style*="gridTemplateColumns: 1fr 1.2fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .card {
+    padding: 16px !important;
+    margin-bottom: 12px;
+  }
+
+  /* Protocol items list stack on small screens */
+  .card[style*="display: flex"][style*="justify-content: space-between"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .card[style*="display: flex"][style*="justify-content: space-between"] button {
+    width: 100% !important;
+  }
+}
