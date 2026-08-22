@@ -70,7 +70,7 @@ export default function CycleSyncModule({ cycleData, onUpdateCycleData }) {
   };
 
   return (
-    <div style={{ animation: 'popIn 0.3s ease-out' }}>
+    <div style={{ animation: 'popIn 0.3s ease-out', width: '100%' }}>
       <div className="section-header" style={{ borderBottom: '1px solid rgba(255, 182, 193, 0.2)' }}>
         <div>
           <h2 style={{ color: 'var(--text-main)', fontSize: '24px', fontWeight: '500' }}>Cycle Sync Module</h2>
@@ -86,61 +86,61 @@ export default function CycleSyncModule({ cycleData, onUpdateCycleData }) {
       </div>
 
       {/* CURRENT PHASE HUD */}
-      <div className="card" style={{ padding: '32px', marginBottom: '24px', textAlign: 'center', background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.2) 100%)', borderTop: `4px solid ${phase.color}` }}>
-        <div style={{ fontSize: '48px', marginBottom: '8px' }}>{phase.icon}</div>
-        <div style={{ fontSize: '14px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>
+      <div className="card" style={{ padding: '24px 18px', marginBottom: '20px', textAlign: 'center', background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.2) 100%)', borderTop: `4px solid ${phase.color}` }}>
+        <div style={{ fontSize: '40px', marginBottom: '6px' }}>{phase.icon}</div>
+        <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>
           Currently In
         </div>
-        <h3 style={{ fontSize: '28px', fontWeight: '300', color: '#fff', marginBottom: '12px' }}>
+        <h3 style={{ fontSize: '24px', fontWeight: '400', color: '#fff', marginBottom: '8px' }}>
           {phase.name}
         </h3>
-        <div style={{ fontSize: '18px', color: phase.color, fontWeight: '500', marginBottom: '24px' }}>
-          Cycle Day {currentDay} <span style={{ color: 'var(--text-dim)', fontSize: '14px' }}>of {averageLength}</span>
+        <div style={{ fontSize: '16px', color: phase.color, fontWeight: '600', marginBottom: '16px' }}>
+          Cycle Day {currentDay} <span style={{ color: 'var(--text-dim)', fontSize: '13px' }}>of {averageLength}</span>
         </div>
         
-        <p style={{ fontSize: '14.5px', color: 'var(--text-main)', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6', background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '12px' }}>
+        <p style={{ fontSize: '13.5px', color: 'var(--text-main)', maxWidth: '500px', margin: '0 auto', lineHeight: '1.5', background: 'rgba(0,0,0,0.25)', padding: '14px', borderRadius: '10px' }}>
           <strong>Bio-Focus:</strong> {phase.focus}
         </p>
       </div>
 
       {/* SETTINGS FORM */}
-      <div className="card" style={{ padding: '24px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: '400', color: '#fff', marginBottom: '16px' }}>
+      <div className="card" style={{ padding: '20px 18px' }}>
+        <h3 style={{ fontSize: '17px', fontWeight: '500', color: '#fff', marginBottom: '14px' }}>
           Cycle Calibration
         </h3>
 
-        <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div>
-            <label className="input-label" style={{ color: 'var(--text-main)' }}>First Day of Last Period</label>
-            <input
-              type="date"
-              className="input-field"
-              value={lastPeriodStart}
-              onChange={(e) => setLastPeriodStart(e.target.value)}
-              required
-              style={{ padding: '12px' }}
-            />
+        <form onSubmit={handleSave}>
+          <div className="responsive-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+            <div>
+              <label className="input-label" style={{ color: 'var(--text-main)' }}>First Day of Last Period</label>
+              <input
+                type="date"
+                className="input-field"
+                value={lastPeriodStart}
+                onChange={(e) => setLastPeriodStart(e.target.value)}
+                required
+                style={{ padding: '11px 14px' }}
+              />
+            </div>
+
+            <div>
+              <label className="input-label" style={{ color: 'var(--text-main)' }}>Average Cycle Length (Days)</label>
+              <input
+                type="number"
+                min="21"
+                max="45"
+                className="input-field"
+                value={averageLength}
+                onChange={(e) => setAverageLength(e.target.value)}
+                required
+                style={{ padding: '11px 14px' }}
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="input-label" style={{ color: 'var(--text-main)' }}>Average Cycle Length (Days)</label>
-            <input
-              type="number"
-              min="21"
-              max="45"
-              className="input-field"
-              value={averageLength}
-              onChange={(e) => setAverageLength(e.target.value)}
-              required
-              style={{ padding: '12px' }}
-            />
-          </div>
-
-          <div style={{ gridColumn: '1 / -1', marginTop: '8px' }}>
-            <button type="submit" className="btn btn-secondary" style={{ width: '100%', padding: '14px', borderColor: 'var(--accent-pink)', color: 'var(--text-main)' }}>
-              Save & Sync AI Logic
-            </button>
-          </div>
+          <button type="submit" className="btn btn-secondary" style={{ width: '100%', padding: '13px', fontSize: '14px', borderRadius: '10px', borderColor: 'var(--accent-pink)', color: 'var(--text-main)' }}>
+            ✓ Save & Sync AI Logic
+          </button>
         </form>
       </div>
     </div>

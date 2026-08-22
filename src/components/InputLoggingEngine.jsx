@@ -13,11 +13,15 @@ const INJECTION_SITES = [
 ];
 
 export default function InputLoggingEngine({
-  injections,
-  dailyLogs,
+  injections = [],
+  vitamins = [],
+  wellnessLogs = [],
+  dailyLogs = [],
   onAddDailyLog,
-  subjectiveWellness,
+  subjectiveWellness = [],
   onAddWellness,
+  onUpdateVitamins,
+  onUpdateWellness,
   cycleData
 }) {
   const [selectedProtocolId, setSelectedProtocolId] = useState(injections[0]?.id || '');
@@ -89,6 +93,14 @@ export default function InputLoggingEngine({
     showToast('Subjective Wellness Logged');
   };
 
+  const handleToggleVitamin = (id) => {
+    sound.playSuccess();
+    if (!onUpdateVitamins) return;
+    const updated = vitamins.map(v => v.id === id ? { ...v, takenToday: !v.takenToday } : v);
+    onUpdateVitamins(updated);
+    showToast('Supplement status updated');
+  };
+
   // Tooltip Helper
   const getTooltip = (compoundName) => {
     const name = (compoundName || '').toLowerCase();
@@ -101,7 +113,7 @@ export default function InputLoggingEngine({
   const activeCompound = injections.find(i => i.id === selectedProtocolId) || injections[0];
 
   return (
-    <div style={{ animation: 'popIn 0.2s ease' }}>
+    <div style={{ animation: 'popIn 0.2s ease', width: '100%' }}>
       <div className="section-header">
         <div>
           <h2>Input & Logging Engine</h2>
@@ -114,10 +126,10 @@ export default function InputLoggingEngine({
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px', marginBottom: '28px' }}>
+      <div className="responsive-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '28px' }}>
         
         {/* INJECTION EXECUTION FORM */}
-        <div className="card" style={{ padding: '24px' }}>
+        <div className="card" style={{ padding: '24px', margin: 0 }}>
           <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>💉</span> Log Injection Administration
           </h3>
@@ -138,7 +150,7 @@ export default function InputLoggingEngine({
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '14px', marginBottom: '16px' }}>
+            <div className="responsive-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label className="input-label">Administered Dose</label>
                 <input
@@ -160,20 +172,20 @@ export default function InputLoggingEngine({
                 >
                   {INJECTION_SITES.map((site) => (
                     <option key={site.id} value={site.name}>
-                      {site.name} ({site.coords})
+                      {site.name}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px' }}>
-              ✓ Confirm Administration & Update Pharmacokinetics
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '13px', fontSize: '14px', borderRadius: '10px' }}>
+              ✓ Confirm Administration
             </button>
           </form>
 
           {/* Educational Tooltip */}
-          <div style={{ background: 'rgba(255, 182, 193, 0.05)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255, 182, 193, 0.2)', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <div style={{ background: 'rgba(255, 182, 193, 0.05)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(255, 182, 193, 0.2)', marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
              <span style={{ fontSize: '18px' }}>💡</span>
              <div>
                <div style={{ fontSize: '12px', color: 'var(--accent-pink)', fontWeight: '600', marginBottom: '2px' }}>Cellular Insight</div>
@@ -184,28 +196,28 @@ export default function InputLoggingEngine({
           </div>
 
           {/* Site Rotation Guide */}
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border)', marginTop: '16px' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--border)', marginTop: '14px' }}>
             <div style={{ fontSize: '11px', color: 'var(--accent-amber)', fontWeight: '700', textTransform: 'uppercase' }}>
-              🎯 Tissue Fatigue Avoidance:
+              🎯 Tissue Rotation:
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Never inject into the exact same location consecutively. Maintain a 1.5-inch distance to prevent subcutaneous lipohypertrophy.
+              Rotate between abdomen, delts, and glutes to keep subcutaneous tissue healthy.
             </div>
           </div>
         </div>
 
         {/* SUBJECTIVE WELLNESS ASSESSMENTS */}
-        <div className="card" style={{ padding: '24px' }}>
+        <div className="card" style={{ padding: '24px', margin: 0 }}>
           <h3 style={{ fontSize: '18px', fontWeight: '400', color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🌸</span> Daily Wellness Check-In
           </h3>
 
           <form onSubmit={handleWellnessSubmit}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px' }}>
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '6px' }}>
                   <span>Daytime Energy</span>
-                  <span style={{ color: 'var(--accent-cyan)' }}>{energyRating}/10</span>
+                  <span style={{ color: 'var(--accent-cyan)', fontWeight: '700' }}>{energyRating}/10</span>
                 </div>
                 <input
                   type="range"
@@ -218,9 +230,9 @@ export default function InputLoggingEngine({
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '6px' }}>
                   <span>Mood & Emotional Balance</span>
-                  <span style={{ color: 'var(--accent-pink)' }}>{moodRating}/10</span>
+                  <span style={{ color: 'var(--accent-pink)', fontWeight: '700' }}>{moodRating}/10</span>
                 </div>
                 <input
                   type="range"
@@ -233,9 +245,9 @@ export default function InputLoggingEngine({
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '6px' }}>
                   <span>Brain Fog (1 = Clear, 10 = Heavy)</span>
-                  <span style={{ color: 'var(--accent-amber)' }}>{brainFog}/10</span>
+                  <span style={{ color: 'var(--accent-amber)', fontWeight: '700' }}>{brainFog}/10</span>
                 </div>
                 <input
                   type="range"
@@ -248,9 +260,9 @@ export default function InputLoggingEngine({
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '6px' }}>
                   <span>Libido & Vitality</span>
-                  <span style={{ color: 'var(--accent-purple)' }}>{libido}/10</span>
+                  <span style={{ color: 'var(--accent-purple)', fontWeight: '700' }}>{libido}/10</span>
                 </div>
                 <input
                   type="range"
@@ -263,9 +275,9 @@ export default function InputLoggingEngine({
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', fontWeight: '500', color: 'var(--text-main)', marginBottom: '6px' }}>
                   <span>Joint & Tendon Health</span>
-                  <span style={{ color: 'var(--accent-green)' }}>{jointHealth}/10</span>
+                  <span style={{ color: 'var(--accent-green)', fontWeight: '700' }}>{jointHealth}/10</span>
                 </div>
                 <input
                   type="range"
@@ -284,43 +296,79 @@ export default function InputLoggingEngine({
                   className="input-field"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="e.g. Mild cramps, great workout."
+                  placeholder="e.g. Felt great post-workout, restful sleep."
                 />
               </div>
             </div>
 
-            <button type="submit" className="btn btn-secondary" style={{ width: '100%', padding: '12px', borderColor: 'var(--accent-pink)', color: 'var(--text-main)' }}>
+            <button type="submit" className="btn btn-secondary" style={{ width: '100%', padding: '13px', fontSize: '14px', borderRadius: '10px', borderColor: 'var(--accent-pink)', color: 'var(--text-main)' }}>
               ✓ Save Wellness Check-In
             </button>
           </form>
         </div>
       </div>
 
-      {/* ADMINISTRATION AUDIT TABLE */}
-      <div className="card">
+      {/* QUICK VITAMIN CHECKLIST */}
+      {vitamins.length > 0 && (
+        <div className="card" style={{ padding: '20px 24px', marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '17px', fontWeight: '600', color: '#fff', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>💊</span> Log Daily Supplements & Vitamins
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+            {vitamins.map((v) => (
+              <div
+                key={v.id}
+                onClick={() => handleToggleVitamin(v.id)}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  background: v.takenToday ? 'rgba(5, 255, 161, 0.08)' : 'rgba(255,255,255,0.02)',
+                  border: `1px solid ${v.takenToday ? 'var(--accent-green)' : 'var(--border)'}`,
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#fff' }}>{v.name}</div>
+                  <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{v.dose} • {v.timeOfDay}</div>
+                </div>
+                <span className={`badge ${v.takenToday ? 'badge-green' : 'badge-amber'}`} style={{ fontSize: '11px' }}>
+                  {v.takenToday ? '✓ Taken' : '○ Tap to Log'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ADMINISTRATION AUDIT TABLE (RESPONSIVE CARDS ON MOBILE) */}
+      <div className="card" style={{ padding: '20px 24px' }}>
         <h3 style={{ fontSize: '17px', fontWeight: '800', color: '#fff', marginBottom: '14px' }}>
           Historical Administration Audit Log ({dailyLogs.length} Records)
         </h3>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left', minWidth: '450px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-                <th style={{ padding: '10px 14px' }}>COMPOUND</th>
-                <th style={{ padding: '10px 14px' }}>DOSE</th>
-                <th style={{ padding: '10px 14px' }}>ANATOMICAL SITE</th>
-                <th style={{ padding: '10px 14px' }}>TIMESTAMP</th>
-                <th style={{ padding: '10px 14px' }}>STATUS</th>
+                <th style={{ padding: '10px 12px' }}>COMPOUND</th>
+                <th style={{ padding: '10px 12px' }}>DOSE</th>
+                <th style={{ padding: '10px 12px' }}>SITE</th>
+                <th style={{ padding: '10px 12px' }}>TIME</th>
+                <th style={{ padding: '10px 12px' }}>STATUS</th>
               </tr>
             </thead>
             <tbody>
               {dailyLogs.map((log) => (
                 <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: '700', color: '#fff' }}>{log.name}</td>
-                  <td style={{ padding: '10px 14px', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>{log.dose || log.actual_dose_mcg + ' mcg'}</td>
-                  <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>{log.site}</td>
-                  <td style={{ padding: '10px 14px', color: 'var(--text-dim)' }}>{log.displayTime || log.timestamp}</td>
-                  <td style={{ padding: '10px 14px' }}>
+                  <td style={{ padding: '10px 12px', fontWeight: '700', color: '#fff' }}>{log.name}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>{log.dose || log.actual_dose_mcg + ' mcg'}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>{log.site}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--text-dim)' }}>{log.displayTime || log.timestamp}</td>
+                  <td style={{ padding: '10px 12px' }}>
                     <span className="badge badge-green">✓ Ingested</span>
                   </td>
                 </tr>
