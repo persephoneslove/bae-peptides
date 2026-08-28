@@ -1,5 +1,3 @@
-import { POPULAR_PEPTIDE_LIBRARY } from '../components/InjectionManager';
-
 const STORAGE_KEYS = {
   INJECTIONS: 'biobae_injections_v2',
   VITAMINS: 'biobae_vitamins_v2',
@@ -9,6 +7,7 @@ const STORAGE_KEYS = {
   SUBJECTIVE_WELLNESS: 'biobae_subjective_wellness_v2',
   BIOMARKERS_LAB: 'biobae_biomarkers_lab_v2',
   CYCLE_DATA: 'biobae_cycle_data_v2',
+  CUSTOM_PEPTIDES: 'biobae_custom_peptides_v2',
   LAST_BACKUP_TIME: 'biobae_last_backup_time'
 };
 
@@ -30,7 +29,11 @@ const DEFAULT_INJECTIONS = [
     vialMg: 10,
     bacWaterMl: 2.0,
     color: '#00f2fe',
-    consecutiveDaysActive: 14
+    consecutiveDaysActive: 14,
+    start_date: new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0],
+    cycle_duration: 60,
+    cycle_days_on: 5,
+    cycle_days_off: 2
   },
   {
     id: 'inj-2',
@@ -43,7 +46,11 @@ const DEFAULT_INJECTIONS = [
     vialMg: 10,
     bacWaterMl: 2.0,
     color: '#ffb703',
-    consecutiveDaysActive: 8
+    consecutiveDaysActive: 8,
+    start_date: new Date(Date.now() - 8 * 86400000).toISOString().split('T')[0],
+    cycle_duration: 30,
+    cycle_days_on: 3,
+    cycle_days_off: 4
   }
 ];
 
@@ -90,8 +97,32 @@ const DEFAULT_BIOMETRICS = [
 ];
 
 const DEFAULT_SUBJECTIVE_WELLNESS = [
-  { id: 'ass-1', date: 'Today', timestamp: new Date().toISOString(), energy_rating: 8, mood_rating: 9, brain_fog: 2, libido: 7, joint_health: 8, notes: 'Feeling balanced around ovulation.' },
-  { id: 'ass-2', date: 'Yesterday', timestamp: new Date(Date.now() - 86400000).toISOString(), energy_rating: 8, mood_rating: 8, brain_fog: 3, libido: 7, joint_health: 9, notes: 'Good energy, mild craving.' }
+  {
+    id: 'ass-1',
+    date: 'Today',
+    timestamp: new Date().toISOString(),
+    energy_rating: 8,
+    mood_rating: 9,
+    brain_fog: 2,
+    skin_sensitivity: 'Normal (No Reaction)',
+    libido: 7,
+    orgasm_strength: 8,
+    joint_health: 8,
+    notes: 'Feeling balanced around ovulation.'
+  },
+  {
+    id: 'ass-2',
+    date: 'Yesterday',
+    timestamp: new Date(Date.now() - 86400000).toISOString(),
+    energy_rating: 8,
+    mood_rating: 8,
+    brain_fog: 3,
+    skin_sensitivity: 'Normal (No Reaction)',
+    libido: 7,
+    orgasm_strength: 7,
+    joint_health: 9,
+    notes: 'Good energy, mild craving.'
+  }
 ];
 
 const DEFAULT_CYCLE_DATA = {
@@ -99,6 +130,8 @@ const DEFAULT_CYCLE_DATA = {
   averageLength: 28,
   currentDay: 14
 };
+
+const DEFAULT_CUSTOM_PEPTIDES = [];
 
 export function getStorageData(key, fallback) {
   try {
@@ -131,7 +164,7 @@ export function triggerAutoBackupSnapshot() {
   try {
     const snapshot = {
       timestamp: new Date().toISOString(),
-      version: '2.0.0',
+      version: '3.0.0',
       data: {
         injections: getStorageData(STORAGE_KEYS.INJECTIONS, DEFAULT_INJECTIONS),
         vitamins: getStorageData(STORAGE_KEYS.VITAMINS, DEFAULT_VITAMINS),
@@ -140,7 +173,8 @@ export function triggerAutoBackupSnapshot() {
         biometrics: getStorageData(STORAGE_KEYS.BIOMETRICS, DEFAULT_BIOMETRICS),
         subjectiveWellness: getStorageData(STORAGE_KEYS.SUBJECTIVE_WELLNESS, DEFAULT_SUBJECTIVE_WELLNESS),
         biomarkersLab: getStorageData(STORAGE_KEYS.BIOMARKERS_LAB, []),
-        cycleData: getStorageData(STORAGE_KEYS.CYCLE_DATA, DEFAULT_CYCLE_DATA)
+        cycleData: getStorageData(STORAGE_KEYS.CYCLE_DATA, DEFAULT_CYCLE_DATA),
+        customPeptides: getStorageData(STORAGE_KEYS.CUSTOM_PEPTIDES, DEFAULT_CUSTOM_PEPTIDES)
       }
     };
     
@@ -197,6 +231,7 @@ export function importDataFromFile(file, onComplete) {
       if (data.subjectiveWellness) localStorage.setItem(STORAGE_KEYS.SUBJECTIVE_WELLNESS, JSON.stringify(data.subjectiveWellness));
       if (data.biomarkersLab) localStorage.setItem(STORAGE_KEYS.BIOMARKERS_LAB, JSON.stringify(data.biomarkersLab));
       if (data.cycleData) localStorage.setItem(STORAGE_KEYS.CYCLE_DATA, JSON.stringify(data.cycleData));
+      if (data.customPeptides) localStorage.setItem(STORAGE_KEYS.CUSTOM_PEPTIDES, JSON.stringify(data.customPeptides));
       
       triggerAutoBackupSnapshot();
       if (onComplete) onComplete(true);
@@ -217,5 +252,6 @@ export const initialData = {
   subjectiveWellness: getStorageData(STORAGE_KEYS.SUBJECTIVE_WELLNESS, DEFAULT_SUBJECTIVE_WELLNESS),
   biomarkersLab: getStorageData(STORAGE_KEYS.BIOMARKERS_LAB, []),
   cycleData: getStorageData(STORAGE_KEYS.CYCLE_DATA, DEFAULT_CYCLE_DATA),
+  customPeptides: getStorageData(STORAGE_KEYS.CUSTOM_PEPTIDES, DEFAULT_CUSTOM_PEPTIDES),
   KEYS: STORAGE_KEYS
 };

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import DailyCompass from './components/DailyCompass';
+import DosingCalendarView from './components/DosingCalendarView';
 import InputLoggingEngine from './components/InputLoggingEngine';
+import InjectionManager from './components/InjectionManager';
 import BiometricsEngine from './components/BiometricsEngine';
 import InsightsEngine from './components/InsightsEngine';
 import CycleSyncModule from './components/CycleSyncModule';
@@ -8,10 +10,11 @@ import UnifiedCommandView from './components/UnifiedCommandView';
 import CalculatorView from './components/CalculatorView';
 import RecoveryView from './components/RecoveryView';
 import { initialData, setStorageData } from './utils/storage';
+import { recalculateAllCycleDays } from './utils/dateAndCycleUtils';
 import { sound } from './utils/audio';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'input_engine' | 'biometrics' | 'analytics' | 'unified' | 'calculator' | 'recovery'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'calendar' | 'peptides' | 'input_engine' | 'cycle_sync' | 'biometrics' | 'analytics' | 'unified' | 'calculator' | 'recovery'
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Core Relational Data Stores
@@ -24,6 +27,7 @@ export default function App() {
   const [biometrics, setBiometrics] = useState(initialData.biometrics);
   const [subjectiveWellness, setSubjectiveWellness] = useState(initialData.subjectiveWellness);
   const [cycleData, setCycleData] = useState(initialData.cycleData);
+  const [customPeptides, setCustomPeptides] = useState(initialData.customPeptides || []);
 
   // Sync Handlers
   const handleUpdateInjections = (newInjections) => {
@@ -52,7 +56,14 @@ export default function App() {
   };
 
   const handleAddDailyLog = (newLog) => {
-    const updated = [newLog, ...dailyLogs];
+    const rawList = [newLog, ...dailyLogs];
+    const updated = recalculateAllCycleDays(rawList);
+    setDailyLogs(updated);
+    setStorageData(initialData.KEYS.DAILY_LOGS, updated);
+  };
+
+  const handleUpdateDailyLogs = (newLogs) => {
+    const updated = recalculateAllCycleDays(newLogs);
     setDailyLogs(updated);
     setStorageData(initialData.KEYS.DAILY_LOGS, updated);
   };
@@ -69,6 +80,11 @@ export default function App() {
     setStorageData(initialData.KEYS.SUBJECTIVE_WELLNESS, updated);
   };
 
+  const handleUpdateSubjectiveWellness = (newWellnessList) => {
+    setSubjectiveWellness(newWellnessList);
+    setStorageData(initialData.KEYS.SUBJECTIVE_WELLNESS, newWellnessList);
+  };
+
   const handleUpdateCycleData = (newData) => {
     setCycleData(newData);
     setStorageData(initialData.KEYS.CYCLE_DATA, newData);
@@ -83,7 +99,7 @@ export default function App() {
       name: item.name,
       actual_dose_mcg: parseFloat(item.dose) || 250,
       dose: item.dose,
-      site: 'Abdomen (SubQ)',
+      site: item.site || 'Abdomen (SubQ)',
       timestamp: new Date().toISOString(),
       displayTime: 'Today ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       dose_taken: true,
@@ -127,11 +143,19 @@ export default function App() {
           </button>
 
           <button
-            className={`nav-item ${activeTab === 'cycle_sync' ? 'active' : ''}`}
-            onClick={() => handleNav('cycle_sync')}
+            className={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`}
+            onClick={() => handleNav('calendar')}
           >
-            <span className="icon">🔄</span>
-            <span>Cycle Sync Module</span>
+            <span className="icon">🗓️</span>
+            <span>Dosing Calendar</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'peptides' ? 'active' : ''}`}
+            onClick={() => handleNav('peptides')}
+          >
+            <span className="icon">💉</span>
+            <span>Peptide Protocols</span>
           </button>
 
           <button
@@ -140,6 +164,14 @@ export default function App() {
           >
             <span className="icon">✨</span>
             <span>Input & Logging</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'cycle_sync' ? 'active' : ''}`}
+            onClick={() => handleNav('cycle_sync')}
+          >
+            <span className="icon">🔄</span>
+            <span>Cycle Sync Module</span>
           </button>
 
           <button
@@ -216,25 +248,48 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'cycle_sync' && (
-          <CycleSyncModule
+        {activeTab === 'calendar' && (
+          <DosingCalendarView
+            injections={injections}
+            dailyLogs={dailyLogs}
+            onAddDailyLog={handleAddDailyLog}
+            onUpdateDailyLogs={handleUpdateDailyLogs}
+            subjectiveWellness={subjectiveWellness}
+            onAddWellness={handleAddWellness}
+            onUpdateWellness={handleUpdateSubjectiveWellness}
             cycleData={cycleData}
-            onUpdateCycleData={handleUpdateCycleData}
+          />
+        )}
+
+        {activeTab === 'peptides' && (
+          <InjectionManager
+            injections={injections}
+            onUpdateInjections={handleUpdateInjections}
+            onLogQuickDose={handleLogQuickDose}
           />
         )}
 
         {activeTab === 'input_engine' && (
           <InputLoggingEngine
             injections={injections}
+            onUpdateInjections={handleUpdateInjections}
             vitamins={vitamins}
             wellnessLogs={wellnessLogs}
             dailyLogs={dailyLogs}
             onAddDailyLog={handleAddDailyLog}
+            onUpdateDailyLogs={handleUpdateDailyLogs}
             subjectiveWellness={subjectiveWellness}
             onAddWellness={handleAddWellness}
             onUpdateVitamins={handleUpdateVitamins}
             onUpdateWellness={handleUpdateWellness}
             cycleData={cycleData}
+          />
+        )}
+
+        {activeTab === 'cycle_sync' && (
+          <CycleSyncModule
+            cycleData={cycleData}
+            onUpdateCycleData={handleUpdateCycleData}
           />
         )}
 
@@ -253,6 +308,7 @@ export default function App() {
             biometrics={biometrics}
             subjectiveWellness={subjectiveWellness}
             cycleData={cycleData}
+            customPeptides={customPeptides}
           />
         )}
 

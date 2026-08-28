@@ -1,5 +1,5 @@
 /**
- * Pharmacokinetic Compound Decay Integral Engine
+ * Pharmacokinetic Compound Decay Integral Engine & Advanced Physiological Insights
  *
  * Implements:
  * E(t) = ∫[0 to t] (w1 * P(τ) + w2 * V(τ)) * e^(-λ * (t - τ)) dτ
@@ -24,6 +24,13 @@ export const MASTER_PHARMACOKINETICS = {
   'cjc-1295': { name: 'CJC-1295 (No DAC)', halfLifeHours: 0.5, weight: 1.0, category: 'GHRH Secretagogue' },
   'ipamorelin': { name: 'Ipamorelin', halfLifeHours: 2.0, weight: 1.0, category: 'GHRP' },
   'ghk-cu': { name: 'GHK-Cu', halfLifeHours: 1.0, weight: 0.9, category: 'Collagen Decorin' },
+  'kpv': { name: 'KPV', halfLifeHours: 2.0, weight: 1.0, category: 'Anti-Inflammatory' },
+  'pt-141': { name: 'PT-141 (Bremelanotide)', halfLifeHours: 2.7, weight: 1.1, category: 'Melanocortin Libido' },
+  'kisspeptin-10': { name: 'Kisspeptin-10', halfLifeHours: 0.8, weight: 1.0, category: 'LH/FSH GnRH' },
+  'melanotan ii': { name: 'Melanotan II', halfLifeHours: 1.5, weight: 1.05, category: 'Melanogenesis & Libido' },
+  '5-amino-1mq': { name: '5-Amino-1MQ', halfLifeHours: 6.0, weight: 1.0, category: 'NNMT Inhibitor' },
+  'semax': { name: 'Semax', halfLifeHours: 0.5, weight: 1.0, category: 'BDNF Nootropic' },
+  'selank': { name: 'Selank', halfLifeHours: 0.4, weight: 1.0, category: 'Anxiolytic Nootropic' },
   'nad': { name: 'NAD+ (SubQ)', halfLifeHours: 3.0, weight: 1.0, category: 'PARP & Sirtuins' },
   'standard_vitamin': { name: 'Nutraceutical Compound', halfLifeHours: 8.0, weight: 0.8, category: 'Cofactor' }
 };
@@ -38,20 +45,49 @@ export function getDecayLambda(halfLifeHours) {
 
 /**
  * Calculates current accumulated efficacy E(t) across all past administrations
+ * Dynamically accommodates custom compounds
  */
-export function calculateAccumulatedEfficacy(administrationLogs = [], currentTime = Date.now()) {
+export function calculateAccumulatedEfficacy(administrationLogs = [], currentTime = Date.now(), customPeptides = []) {
   let totalEfficacy = 0;
   const compoundBreakdowns = {};
 
   const nowMs = typeof currentTime === 'number' ? currentTime : new Date(currentTime).getTime();
+
+  // Build combined lookup
+  const customMap = {};
+  if (Array.isArray(customPeptides)) {
+    customPeptides.forEach(p => {
+      const key = (p.name || '').toLowerCase();
+      customMap[key] = {
+        name: p.name,
+        halfLifeHours: parseFloat(p.half_life_hours) || 6.0,
+        weight: parseFloat(p.absorption_weight) || 1.0,
+        category: p.category || 'Custom Formulation'
+      };
+    });
+  }
 
   administrationLogs.forEach((log) => {
     const logTimeMs = new Date(log.timestamp).getTime();
     const elapsedHours = (nowMs - logTimeMs) / (1000 * 60 * 60);
 
     if (elapsedHours >= 0) {
-      const compoundKey = (log.compoundKey || 'bpc-157').toLowerCase();
-      const meta = MASTER_PHARMACOKINETICS[compoundKey] || MASTER_PHARMACOKINETICS['bpc-157'];
+      const compoundKey = (log.compoundKey || log.name || 'bpc-157').toLowerCase();
+      
+      // Match from MASTER, or customMap, or fallback heuristic
+      let meta = MASTER_PHARMACOKINETICS[compoundKey];
+      if (!meta) {
+        // Try substring match in master
+        const matchedKey = Object.keys(MASTER_PHARMACOKINETICS).find(k => compoundKey.includes(k));
+        if (matchedKey) meta = MASTER_PHARMACOKINETICS[matchedKey];
+      }
+      if (!meta && customMap[compoundKey]) {
+        meta = customMap[compoundKey];
+      }
+      if (!meta) {
+        meta = { name: log.name || 'Bioactive Compound', halfLifeHours: 6.0, weight: 1.0, category: 'Targeted Protocol' };
+      }
+
       const lambda = getDecayLambda(meta.halfLifeHours);
       const dose = parseFloat(log.actual_dose_mcg || log.dose || 250);
       const weight = meta.weight || 1.0;
@@ -130,19 +166,104 @@ export function analyzeAutonomicCorrelation(biometrics = [], wellness = []) {
 }
 
 /**
- * Analyzes subjective wellness against cycle_day to find hormonal correlations.
+ * Enhanced: Analyzes subjective wellness against cycle_day, active protocols, libido, orgasm strength, and skin sensitivity
  */
-export function analyzeHormoneCorrelation(wellness = [], cycleData = null) {
+export function analyzeHormoneCorrelation(wellness = [], cycleData = null, activeProtocols = []) {
   let lutealDipDetected = false;
-  let suggestion = 'Your hormonal fluctuations are well-managed. Continue tracking.';
+  let suggestion = 'Your hormonal fluctuations and protocol responses are well-balanced. Continue tracking.';
+  let libidoTrend = { avg: 7.0, status: 'Balanced', insight: 'Libido within baseline.' };
+  let orgasmTrend = { avg: 7.5, status: 'Optimal', insight: 'Orgasm intensity optimal.' };
+  let skinReactionAlert = null;
 
-  if (wellness.length >= 3 && cycleData) {
-    const currentDay = cycleData.currentDay;
-    const avgRecentEnergy = wellness.slice(0, 3).reduce((acc, a) => acc + (a.energy_rating || 7), 0) / 3;
-    const avgRecentMood = wellness.slice(0, 3).reduce((acc, a) => acc + (a.mood_rating || 7), 0) / 3;
+  if (wellness.length > 0) {
+    // 1. Calculate Average Libido & Orgasm Strength
+    const validLibidoLogs = wellness.filter(w => typeof w.libido === 'number');
+    const validOrgasmLogs = wellness.filter(w => typeof w.orgasm_strength === 'number');
 
-    // Luteal Phase (Days 15-28 approx)
-    if (currentDay > 14 && currentDay <= 28) {
+    const avgLibido = validLibidoLogs.length > 0
+      ? validLibidoLogs.reduce((acc, w) => acc + w.libido, 0) / validLibidoLogs.length
+      : 7;
+    const avgOrgasm = validOrgasmLogs.length > 0
+      ? validOrgasmLogs.reduce((acc, w) => acc + w.orgasm_strength, 0) / validOrgasmLogs.length
+      : 7.5;
+
+    // Phase Correlation with Cycle Day
+    const currentDay = cycleData?.currentDay || 14;
+    const isOvulatory = currentDay >= 12 && currentDay <= 16;
+    const isLuteal = currentDay > 16 && currentDay <= 28;
+    const isFollicular = currentDay >= 1 && currentDay < 12;
+
+    // Check for Sexual Health Peptides in stack (PT-141, Kisspeptin, Melanotan II)
+    const hasSexualHealthPeptide = activeProtocols.some(p => {
+      const name = (p.name || '').toLowerCase();
+      return name.includes('pt-141') || name.includes('kisspeptin') || name.includes('melanotan') || name.includes('bremelanotide');
+    });
+
+    if (isOvulatory) {
+      if (avgLibido >= 8) {
+        libidoTrend = {
+          avg: avgLibido.toFixed(1),
+          status: 'Peak Ovulatory Vitality 🔥',
+          insight: 'Estrogen surge around Cycle Day ' + currentDay + ' is aligning with peak endogenous libido and receptor responsiveness.'
+        };
+      } else {
+        libidoTrend = {
+          avg: avgLibido.toFixed(1),
+          status: 'Moderate Ovulatory Response',
+          insight: 'Cycle Day ' + currentDay + ' typically exhibits peak libido; assess if elevated cortisol or fatigue is attenuating the estrogen surge.'
+        };
+      }
+    } else if (isLuteal) {
+      if (avgLibido <= 5) {
+        libidoTrend = {
+          avg: avgLibido.toFixed(1),
+          status: 'Progesterone Luteal Shift',
+          insight: 'Natural shift toward progesterone dominance post-ovulation (Cycle Day ' + currentDay + '). Focus on nourishment and recovery.'
+        };
+      } else {
+        libidoTrend = {
+          avg: avgLibido.toFixed(1),
+          status: 'High Sustained Vitality',
+          insight: 'Sustained vitality and libido during the luteal phase (Cycle Day ' + currentDay + ') indicates optimal adrenal and hormonal reserves.'
+        };
+      }
+    } else {
+      libidoTrend = {
+        avg: avgLibido.toFixed(1),
+        status: 'Follicular Rebuilding Phase',
+        insight: 'Estrogen rising steadily (Cycle Day ' + currentDay + '). Cellular energy and receptivity are climbing.'
+      };
+    }
+
+    if (hasSexualHealthPeptide) {
+      orgasmTrend = {
+        avg: avgOrgasm.toFixed(1),
+        status: 'Melanocortin Enhanced ✨',
+        insight: 'Central melanocortin MC3/MC4 activation or GnRH pulsatility from your active stack is amplifying pelvic blood flow and autonomic sensitivity.'
+      };
+    } else {
+      orgasmTrend = {
+        avg: avgOrgasm.toFixed(1),
+        status: 'Endogenous Baseline (' + avgOrgasm.toFixed(1) + '/10)',
+        insight: 'Physical sensations and neural response remain consistent with menstrual phase telemetry.'
+      };
+    }
+
+    // 2. Skin Sensitivity & Tactile Telemetry
+    const recentSensitivityLogs = wellness.slice(0, 5).filter(w => w.skin_sensitivity && !w.skin_sensitivity.toLowerCase().includes('normal'));
+    if (recentSensitivityLogs.length > 0) {
+      const latestReaction = recentSensitivityLogs[0].skin_sensitivity;
+      skinReactionAlert = {
+        reaction: latestReaction,
+        count: recentSensitivityLogs.length,
+        recommendation: 'Recent telemetry reports: "' + latestReaction + '". If using concentrated SubQ peptides (such as GHK-Cu or KPV), consider diluting with an additional 0.5 mL bacteriostatic water or rotating to vastus lateralis / deltoid tissue.'
+      };
+    }
+
+    // 3. Luteal Phase suggestions
+    if (wellness.length >= 3 && isLuteal) {
+      const avgRecentEnergy = wellness.slice(0, 3).reduce((acc, a) => acc + (a.energy_rating || 7), 0) / 3;
+      const avgRecentMood = wellness.slice(0, 3).reduce((acc, a) => acc + (a.mood_rating || 7), 0) / 3;
       if (avgRecentEnergy < 6.5 || avgRecentMood < 6.5) {
         lutealDipDetected = true;
         suggestion = 'Your energy and mood show a slight dip, characteristic of the luteal phase (post-ovulation rise in progesterone). Consider front-loading your carbohydrates earlier in the day, adding 400mg of Magnesium Glycinate, and slightly reducing high-intensity workouts in favor of zone 2 cardio or yoga to support this natural fluctuation.';
@@ -152,7 +273,10 @@ export function analyzeHormoneCorrelation(wellness = [], cycleData = null) {
 
   return {
     lutealDipDetected,
-    suggestion
+    suggestion,
+    libidoTrend,
+    orgasmTrend,
+    skinReactionAlert
   };
 }
 
@@ -192,13 +316,39 @@ export function calculateVitalityScore(wellness = [], dailyLogs = [], requiredDo
 }
 
 /**
- * Evaluates adaptive cycle durations and identifies diminishing returns
+ * Evaluates adaptive cycle durations and identifies diminishing returns and active lifecycle tracking
  */
 export function evaluateAdaptiveCycles(activeProtocols = []) {
   const cycleAlerts = [];
+  const cycleLifecycles = [];
 
   activeProtocols.forEach((proto) => {
-    const daysActive = proto.consecutiveDaysActive || 14;
+    // Calculate days elapsed from start_date if available
+    let daysActive = proto.consecutiveDaysActive || 14;
+    if (proto.start_date) {
+      const startMs = new Date(proto.start_date).getTime();
+      const nowMs = Date.now();
+      const diffDays = Math.max(1, Math.floor((nowMs - startMs) / (1000 * 60 * 60 * 24)));
+      if (!isNaN(diffDays)) daysActive = diffDays;
+    }
+
+    const duration = proto.cycle_duration || 30;
+    const progressPct = Math.min(100, Math.round((daysActive / duration) * 100));
+    const daysRemaining = Math.max(0, duration - daysActive);
+
+    cycleLifecycles.push({
+      id: proto.id,
+      name: proto.name,
+      startDate: proto.start_date || 'Active',
+      durationDays: duration,
+      daysElapsed: daysActive,
+      daysRemaining,
+      progressPct,
+      cycleDaysOn: proto.cycle_days_on || 5,
+      cycleDaysOff: proto.cycle_days_off || 2,
+      isNearCompletion: daysActive >= (duration - 3)
+    });
+
     const name = (proto.name || '').toLowerCase();
 
     // GH Secretagogues (CJC/Ipamorelin) > 8 weeks continuous
@@ -218,7 +368,19 @@ export function evaluateAdaptiveCycles(activeProtocols = []) {
         recommendation: 'Epithalon telomeric course complete (10–20 days). Conclude protocol for 6 months to allow endogenous epigenetic stabilization.'
       });
     }
+
+    // General Cycle duration exceeded
+    if (daysActive > duration) {
+      cycleAlerts.push({
+        compound: proto.name,
+        type: 'Protocol Cycle Duration Completed',
+        recommendation: `Target cycle duration (${duration} days) has been reached (${daysActive} days elapsed). Evaluate biomarker logs and initiate a planned break/washout phase if recommended.`
+      });
+    }
   });
 
-  return cycleAlerts;
+  return {
+    cycleAlerts,
+    cycleLifecycles
+  };
 }

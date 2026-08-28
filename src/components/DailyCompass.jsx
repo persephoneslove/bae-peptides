@@ -75,6 +75,9 @@ export default function DailyCompass({
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => onNavigate('calendar')} style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}>
+            🗓️ Dosing Calendar
+          </button>
           <button className="btn btn-secondary" onClick={() => onNavigate('cycle_sync')} style={{ borderColor: 'var(--accent-pink)', color: 'var(--accent-pink)' }}>
             🌸 Cycle Sync
           </button>

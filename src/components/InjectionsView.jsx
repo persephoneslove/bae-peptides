@@ -13,18 +13,18 @@ const COMMON_SITES = [
 ];
 
 const POPULAR_PEPTIDES = [
-  { name: 'KLOW Blend', dose: '500 mcg', units: 20, frequency: 'Daily (AM)', timing: 'Morning Fasted' },
-  { name: 'SS-31 (Cardiolipin)', dose: '4.0 mg', units: 40, frequency: 'Daily (AM)', timing: 'Morning' },
-  { name: 'MOTS-c (Mitochondrial)', dose: '5.0 mg', units: 50, frequency: '3x / Week', timing: 'Pre-Workout Fasted' },
-  { name: 'BPC-157', dose: '250 mcg', units: 10, frequency: 'Twice Daily (AM/PM)', timing: 'Morning / Bedtime' },
-  { name: 'TB-500', dose: '2.5 mg', units: 50, frequency: '2x / Week', timing: 'Evening' },
-  { name: 'Retatrutide (Triple G)', dose: '2.0 mg', units: 20, frequency: 'Once Weekly', timing: 'Morning Fasted' },
-  { name: 'Tirzepatide', dose: '2.5 mg', units: 25, frequency: 'Once Weekly', timing: 'Morning Fasted' },
-  { name: 'Semaglutide', dose: '0.25 mg', units: 10, frequency: 'Once Weekly', timing: 'Morning Fasted' },
-  { name: 'CJC-1295 / Ipamorelin', dose: '300 mcg', units: 15, frequency: '5 Days On / 2 Off', timing: 'Bedtime Fasted' },
-  { name: 'Epithalon (Telomeres)', dose: '10 mg', units: 50, frequency: 'Daily (10-Day Cycle)', timing: 'Bedtime' },
-  { name: 'GHK-Cu (Copper Peptide)', dose: '2.0 mg', units: 20, frequency: 'Daily (AM)', timing: 'Morning' },
-  { name: 'PT-141 (Libido)', dose: '1.5 mg', units: 30, frequency: 'As Needed', timing: 'Evening' }
+  { name: 'KLOW Blend', dose: '500 mcg', units: 20, frequency: 'Daily (AM)', timing: 'Morning Fasted', cycle_duration: 60 },
+  { name: 'SS-31 (Cardiolipin)', dose: '4.0 mg', units: 40, frequency: 'Daily (AM)', timing: 'Morning', cycle_duration: 30 },
+  { name: 'MOTS-c (Mitochondrial)', dose: '5.0 mg', units: 50, frequency: '3x / Week', timing: 'Pre-Workout Fasted', cycle_duration: 30 },
+  { name: 'BPC-157', dose: '250 mcg', units: 10, frequency: 'Twice Daily (AM/PM)', timing: 'Morning / Bedtime', cycle_duration: 30 },
+  { name: 'TB-500', dose: '2.5 mg', units: 50, frequency: '2x / Week', timing: 'Evening', cycle_duration: 30 },
+  { name: 'Retatrutide (Triple G)', dose: '2.0 mg', units: 20, frequency: 'Once Weekly', timing: 'Morning Fasted', cycle_duration: 90 },
+  { name: 'Tirzepatide', dose: '2.5 mg', units: 25, frequency: 'Once Weekly', timing: 'Morning Fasted', cycle_duration: 90 },
+  { name: 'Semaglutide', dose: '0.25 mg', units: 10, frequency: 'Once Weekly', timing: 'Morning Fasted', cycle_duration: 90 },
+  { name: 'CJC-1295 / Ipamorelin', dose: '300 mcg', units: 15, frequency: '5 Days On / 2 Off', timing: 'Bedtime Fasted', cycle_duration: 60 },
+  { name: 'Epithalon (Telomeres)', dose: '10 mg', units: 50, frequency: 'Daily (10-Day Cycle)', timing: 'Bedtime', cycle_duration: 20 },
+  { name: 'GHK-Cu (Copper Peptide)', dose: '2.0 mg', units: 20, frequency: 'Daily (AM)', timing: 'Morning', cycle_duration: 30 },
+  { name: 'PT-141 (Libido)', dose: '1.5 mg', units: 30, frequency: 'As Needed', timing: 'Evening', cycle_duration: 30 }
 ];
 
 export default function InjectionsView({ injections, onUpdateInjections, onLogDose }) {
@@ -38,6 +38,10 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
   const [units, setUnits] = useState('10');
   const [frequency, setFrequency] = useState('Daily (AM)');
   const [timing, setTiming] = useState('Morning Fasted');
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [cycleDuration, setCycleDuration] = useState('30');
+  const [daysOn, setDaysOn] = useState('5');
+  const [daysOff, setDaysOff] = useState('2');
 
   const handleOpenAdd = () => {
     sound.playClick();
@@ -47,6 +51,10 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
     setUnits('10');
     setFrequency('Daily (AM)');
     setTiming('Morning Fasted');
+    setStartDate(new Date().toISOString().split('T')[0]);
+    setCycleDuration('30');
+    setDaysOn('5');
+    setDaysOff('2');
     setIsModalOpen(true);
   };
 
@@ -58,6 +66,10 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
     setUnits((item.units || 10).toString());
     setFrequency(item.frequency || 'Daily (AM)');
     setTiming(item.timing || 'Morning Fasted');
+    setStartDate(item.start_date || new Date().toISOString().split('T')[0]);
+    setCycleDuration((item.cycle_duration || 30).toString());
+    setDaysOn((item.cycle_days_on || 5).toString());
+    setDaysOff((item.cycle_days_off || 2).toString());
     setIsModalOpen(true);
   };
 
@@ -68,6 +80,7 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
     setUnits(preset.units.toString());
     setFrequency(preset.frequency);
     setTiming(preset.timing);
+    setCycleDuration((preset.cycle_duration || 30).toString());
   };
 
   const handleSave = (e) => {
@@ -79,7 +92,18 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
       // Edit
       const updated = injections.map(inj => {
         if (inj.id === editingId) {
-          return { ...inj, name, dose, units: parseInt(units) || 10, frequency, timing };
+          return {
+            ...inj,
+            name,
+            dose,
+            units: parseInt(units) || 10,
+            frequency,
+            timing,
+            start_date: startDate,
+            cycle_duration: parseInt(cycleDuration) || 30,
+            cycle_days_on: parseInt(daysOn) || 5,
+            cycle_days_off: parseInt(daysOff) || 2
+          };
         }
         return inj;
       });
@@ -94,7 +118,11 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
         frequency,
         timing,
         lastTaken: 'Never',
-        site: selectedSite
+        site: selectedSite,
+        start_date: startDate,
+        cycle_duration: parseInt(cycleDuration) || 30,
+        cycle_days_on: parseInt(daysOn) || 5,
+        cycle_days_off: parseInt(daysOff) || 2
       };
       onUpdateInjections([...injections, newItem]);
     }
@@ -117,10 +145,10 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
       <div className="section-header">
         <div>
           <h2>Injections & Dosing</h2>
-          <p>Easily manage and edit your active peptides, dosages, and injection sites.</p>
+          <p>Easily manage and edit your active peptides, dosages, cycle tracking durations, and injection sites.</p>
         </div>
         <button className="btn btn-primary" onClick={handleOpenAdd}>
-          + Add New Peptide
+          + Add New Peptide Protocol
         </button>
       </div>
 
@@ -157,7 +185,7 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
                   <span className="badge badge-cyan">{item.timing || 'Morning'}</span>
                 </div>
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '6px' }}>
-                  Frequency: <strong style={{ color: '#fff' }}>{item.frequency}</strong> | Last Injected: <strong style={{ color: 'var(--text-muted)' }}>{item.lastTaken || 'Recently'}</strong>
+                  Frequency: <strong style={{ color: '#fff' }}>{item.frequency}</strong> | Cycle: <strong style={{ color: 'var(--accent-cyan)' }}>{item.cycle_duration || 30} Days</strong> (Started: {item.start_date || 'Active'})
                 </div>
               </div>
 
@@ -175,7 +203,7 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
             {/* Bottom Actions */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border)' }}>
               <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>
-                Site: {item.site || selectedSite}
+                Site: {item.site || selectedSite} • Schedule: {item.cycle_days_on || 5}d ON / {item.cycle_days_off || 2}d OFF
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -191,7 +219,7 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
                   style={{ padding: '8px 14px', fontSize: '13px' }}
                   onClick={() => handleOpenEdit(item)}
                 >
-                  ✏️ Edit Dosage
+                  ✏️ Edit Protocol & Cycle
                 </button>
                 <button
                   className="btn btn-danger"
@@ -213,7 +241,7 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#fff' }}>
-                {editingId ? '✏️ Edit Dosage & Schedule' : '➕ Add Peptide Protocol'}
+                {editingId ? '✏️ Edit Dosage, Schedule & Cycle' : '➕ Add Peptide Protocol'}
               </h3>
               <button style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '18px', cursor: 'pointer' }} onClick={() => setIsModalOpen(false)}>✕</button>
             </div>
@@ -273,6 +301,58 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
                     value={units}
                     onChange={(e) => setUnits(e.target.value)}
                   />
+                </div>
+              </div>
+
+              {/* Cycle Tracking */}
+              <div style={{ background: 'rgba(0, 242, 254, 0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(0, 242, 254, 0.2)', marginBottom: '14px' }}>
+                <div style={{ fontSize: '11.5px', fontWeight: '700', color: 'var(--accent-cyan)', marginBottom: '8px' }}>
+                  🔄 Active Cycle Duration & Tracking
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr', gap: '8px' }}>
+                  <div>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Start Date</label>
+                    <input
+                      type="date"
+                      className="input-field"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Duration (Days)</label>
+                    <input
+                      type="number"
+                      min="7"
+                      max="180"
+                      className="input-field"
+                      value={cycleDuration}
+                      onChange={(e) => setCycleDuration(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Days ON</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="7"
+                      className="input-field"
+                      value={daysOn}
+                      onChange={(e) => setDaysOn(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Days OFF</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="7"
+                      className="input-field"
+                      value={daysOff}
+                      onChange={(e) => setDaysOff(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
