@@ -358,14 +358,33 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
                 <div>
-                  <label className="input-label">Frequency</label>
-                  <select className="select-field" value={frequency} onChange={(e) => setFrequency(e.target.value)}>
-                    <option value="Daily (AM)">Daily (AM)</option>
-                    <option value="Daily (PM)">Daily (PM)</option>
+                  <label className="input-label">Frequency & Schedule</label>
+                  <select
+                    className="select-field"
+                    value={frequency}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFrequency(val);
+                      if (val.includes('7 Days') || val.includes('Daily Continuous')) {
+                        setDaysOn(7);
+                        setDaysOff(0);
+                      } else if (val.includes('6 Days')) {
+                        setDaysOn(6);
+                        setDaysOff(1);
+                      } else if (val.includes('5 Days')) {
+                        setDaysOn(5);
+                        setDaysOff(2);
+                      }
+                    }}
+                  >
+                    <option value="7 Days On / 0 Days Off (Daily Continuous)">7 Days On / 0 Days Off (Daily Continuous)</option>
+                    <option value="Daily (AM)">Daily (AM) - Continuous</option>
+                    <option value="Daily (PM)">Daily (PM) - Continuous</option>
                     <option value="Twice Daily (AM/PM)">Twice Daily (AM/PM)</option>
+                    <option value="6 Days On / 1 Day Off">6 Days On / 1 Day Off</option>
+                    <option value="5 Days On / 2 Off">5 Days On / 2 Off</option>
                     <option value="3x / Week">3x / Week</option>
                     <option value="2x / Week">2x / Week</option>
-                    <option value="5 Days On / 2 Off">5 Days On / 2 Off</option>
                     <option value="Once Weekly">Once Weekly</option>
                     <option value="As Needed">As Needed</option>
                   </select>

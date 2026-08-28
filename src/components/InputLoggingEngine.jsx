@@ -998,18 +998,65 @@ export default function InputLoggingEngine({
                   />
                 </div>
                 <div>
-                  <label className="input-label">Frequency</label>
+                  <label className="input-label">Frequency & Schedule</label>
                   <select
                     className="select-field"
                     value={newPeptideForm.frequency}
-                    onChange={(e) => setNewPeptideForm({ ...newPeptideForm, frequency: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      let daysOn = newPeptideForm.cycle_days_on || 7;
+                      let daysOff = newPeptideForm.cycle_days_off || 0;
+                      if (val.includes('7 Days') || val.includes('Daily Continuous')) {
+                        daysOn = 7;
+                        daysOff = 0;
+                      } else if (val.includes('6 Days')) {
+                        daysOn = 6;
+                        daysOff = 1;
+                      } else if (val.includes('5 Days')) {
+                        daysOn = 5;
+                        daysOff = 2;
+                      } else if (val.includes('Every Other Day')) {
+                        daysOn = 1;
+                        daysOff = 1;
+                      }
+                      setNewPeptideForm({ ...newPeptideForm, frequency: val, cycle_days_on: daysOn, cycle_days_off: daysOff });
+                    }}
                   >
-                    <option value="Daily (AM)">Daily (AM)</option>
-                    <option value="Daily (PM)">Daily (PM)</option>
-                    <option value="Twice Daily">Twice Daily</option>
+                    <option value="7 Days On / 0 Days Off (Daily Continuous)">7 Days On / 0 Days Off (Daily Continuous)</option>
+                    <option value="Daily (AM)">Daily (AM) - Continuous</option>
+                    <option value="Daily (PM)">Daily (PM) - Continuous</option>
+                    <option value="Twice Daily (AM/PM)">Twice Daily (AM/PM)</option>
+                    <option value="6 Days On / 1 Day Off">6 Days On / 1 Day Off</option>
+                    <option value="5 Days On / 2 Days Off">5 Days On / 2 Days Off</option>
+                    <option value="Every Other Day (EOD)">Every Other Day (EOD)</option>
                     <option value="3x / Week">3x / Week</option>
                     <option value="Once Weekly">Once Weekly</option>
                   </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+                <div>
+                  <label className="input-label">Days ON</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="7"
+                    className="input-field"
+                    value={newPeptideForm.cycle_days_on || 7}
+                    onChange={(e) => setNewPeptideForm({ ...newPeptideForm, cycle_days_on: parseInt(e.target.value) || 7 })}
+                  />
+                </div>
+                <div>
+                  <label className="input-label">Days OFF</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="7"
+                    className="input-field"
+                    value={newPeptideForm.cycle_days_off !== undefined ? newPeptideForm.cycle_days_off : 0}
+                    onChange={(e) => setNewPeptideForm({ ...newPeptideForm, cycle_days_off: parseInt(e.target.value) || 0 })}
+                  />
                 </div>
               </div>
 

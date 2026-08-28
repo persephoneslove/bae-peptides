@@ -457,26 +457,26 @@ export default function DosingCalendarView({
         <div className="card" style={{ minWidth: 0, width: '100%', padding: '20px', margin: 0, boxSizing: 'border-box' }}>
           
           {/* Month Navigation Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#fff', margin: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#fff', margin: 0 }}>
                 {monthNames[currentMonth]} {currentYear}
               </h3>
               <button
                 type="button"
                 className="btn btn-secondary"
-                style={{ fontSize: '11px', padding: '3px 8px' }}
+                style={{ fontSize: '13px', padding: '6px 14px', minHeight: '38px' }}
                 onClick={handleTodayJump}
               >
                 Today
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 type="button"
                 className="btn btn-secondary"
-                style={{ fontSize: '13px', padding: '6px 12px' }}
+                style={{ fontSize: '14px', padding: '8px 16px', minHeight: '42px' }}
                 onClick={handlePrevMonth}
               >
                 ◀ Prev
@@ -484,7 +484,7 @@ export default function DosingCalendarView({
               <button
                 type="button"
                 className="btn btn-secondary"
-                style={{ fontSize: '13px', padding: '6px 12px' }}
+                style={{ fontSize: '14px', padding: '8px 16px', minHeight: '42px' }}
                 onClick={handleNextMonth}
               >
                 Next ▶
@@ -493,7 +493,7 @@ export default function DosingCalendarView({
           </div>
 
           {/* Weekday Labels (7 Equal Responsive Tracks) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', textAlign: 'center', fontSize: '12px', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '10px', width: '100%' }}>
             <div>SUN</div>
             <div>MON</div>
             <div>TUE</div>
@@ -504,10 +504,10 @@ export default function DosingCalendarView({
           </div>
 
           {/* Calendar Grid (7 Equal Responsive Tracks with No Overflow) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '6px', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '8px', width: '100%' }}>
             {calendarCells.map((cell) => {
               if (cell.type === 'blank') {
-                return <div key={cell.key} style={{ minHeight: '85px', minWidth: 0, background: 'rgba(255,255,255,0.01)', borderRadius: '8px' }} />;
+                return <div key={cell.key} style={{ minHeight: '96px', minWidth: 0, background: 'rgba(255,255,255,0.01)', borderRadius: '10px' }} />;
               }
 
               const hasWellness = !!cell.dayWellness;
@@ -517,21 +517,21 @@ export default function DosingCalendarView({
                   key={cell.dateKey}
                   onClick={() => handleSelectDay(cell.dateKey)}
                   style={{
-                    minHeight: '92px',
+                    minHeight: '98px',
                     minWidth: 0,
                     width: '100%',
                     boxSizing: 'border-box',
-                    padding: '6px 5px',
-                    borderRadius: '8px',
+                    padding: '8px 6px',
+                    borderRadius: '10px',
                     background: cell.isSelected
-                      ? 'rgba(0, 242, 254, 0.15)'
+                      ? 'rgba(56, 189, 248, 0.16)'
                       : cell.isTodayCell
-                      ? 'rgba(255, 182, 193, 0.08)'
-                      : 'rgba(255,255,255,0.02)',
+                      ? 'rgba(244, 114, 182, 0.1)'
+                      : 'rgba(255,255,255,0.03)',
                     border: cell.isSelected
                       ? '2px solid var(--accent-cyan)'
                       : cell.isTodayCell
-                      ? '1px solid var(--accent-pink)'
+                      ? '1.5px solid var(--accent-pink)'
                       : '1px solid var(--border)',
                     cursor: 'pointer',
                     display: 'flex',
@@ -632,7 +632,7 @@ export default function DosingCalendarView({
             <button
               type="button"
               className="btn btn-primary"
-              style={{ fontSize: '11.5px', padding: '6px 12px' }}
+              style={{ fontSize: '13.5px', padding: '10px 18px', minHeight: '44px' }}
               onClick={handleOpenAddMissedForDate}
             >
               + Log Dose for Day
@@ -641,16 +641,16 @@ export default function DosingCalendarView({
 
           {/* INLINE QUICK DOSE FORM */}
           {isInlineLogOpen && (
-            <form onSubmit={handleSaveMissedDose} style={{ background: 'rgba(0, 242, 254, 0.05)', border: '1px solid rgba(0, 242, 254, 0.3)', padding: '14px', borderRadius: '10px', marginBottom: '16px' }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--accent-cyan)', marginBottom: '8px' }}>
+            <form onSubmit={handleSaveMissedDose} style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.35)', padding: '18px', borderRadius: '12px', marginBottom: '18px' }}>
+              <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--accent-cyan)', marginBottom: '12px' }}>
                 💉 Record Dose for {selectedDateStr} (Protocol Day {selectedDynamicProtocolDay}):
               </div>
               
-              <div style={{ marginBottom: '10px' }}>
-                <label className="input-label" style={{ fontSize: '11px' }}>Select Compound</label>
+              <div style={{ marginBottom: '12px' }}>
+                <label className="input-label" style={{ fontSize: '12px' }}>Select Compound</label>
                 <select
                   className="select-field"
-                  style={{ fontSize: '12px', padding: '6px 10px' }}
+                  style={{ fontSize: '14.5px', padding: '11px 14px', minHeight: '46px' }}
                   value={doseForm.protocolId}
                   onChange={(e) => {
                     const sel = injections.find(i => i.id === e.target.value);
@@ -670,12 +670,12 @@ export default function DosingCalendarView({
               </div>
 
               {doseForm.protocolId === 'custom' && (
-                <div style={{ marginBottom: '10px' }}>
-                  <label className="input-label" style={{ fontSize: '11px' }}>Custom Name</label>
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="input-label" style={{ fontSize: '12px' }}>Custom Name</label>
                   <input
                     type="text"
                     className="input-field"
-                    style={{ fontSize: '12px', padding: '6px 10px' }}
+                    style={{ fontSize: '14.5px', padding: '11px 14px', minHeight: '46px' }}
                     value={doseForm.name}
                     onChange={(e) => setDoseForm({ ...doseForm, name: e.target.value })}
                     placeholder="e.g. BPC-157"
@@ -684,23 +684,23 @@ export default function DosingCalendarView({
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div>
-                  <label className="input-label" style={{ fontSize: '11px' }}>Dose</label>
+                  <label className="input-label" style={{ fontSize: '12px' }}>Dose</label>
                   <input
                     type="text"
                     className="input-field"
-                    style={{ fontSize: '12px', padding: '6px 10px' }}
+                    style={{ fontSize: '14.5px', padding: '11px 14px', minHeight: '46px' }}
                     value={doseForm.dose}
                     onChange={(e) => setDoseForm({ ...doseForm, dose: e.target.value })}
                     required
                   />
                 </div>
                 <div>
-                  <label className="input-label" style={{ fontSize: '11px' }}>Site</label>
+                  <label className="input-label" style={{ fontSize: '12px' }}>Site</label>
                   <select
                     className="select-field"
-                    style={{ fontSize: '12px', padding: '6px 10px' }}
+                    style={{ fontSize: '14.5px', padding: '11px 14px', minHeight: '46px' }}
                     value={doseForm.site}
                     onChange={(e) => setDoseForm({ ...doseForm, site: e.target.value })}
                   >
@@ -711,35 +711,35 @@ export default function DosingCalendarView({
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
                 <div>
-                  <label className="input-label" style={{ fontSize: '11px' }}>Time</label>
+                  <label className="input-label" style={{ fontSize: '12px' }}>Time</label>
                   <input
                     type="time"
                     className="input-field"
-                    style={{ fontSize: '12px', padding: '6px 10px' }}
+                    style={{ fontSize: '14.5px', padding: '11px 14px', minHeight: '46px' }}
                     value={doseForm.time}
                     onChange={(e) => setDoseForm({ ...doseForm, time: e.target.value })}
                     required
                   />
                 </div>
                 <div>
-                  <label className="input-label" style={{ fontSize: '11px' }}>Auto Protocol Day</label>
+                  <label className="input-label" style={{ fontSize: '12px' }}>Auto Protocol Day</label>
                   <input
                     type="text"
                     className="input-field"
-                    style={{ fontSize: '12px', padding: '6px 10px', background: 'rgba(0,0,0,0.3)', color: 'var(--accent-cyan)' }}
+                    style={{ fontSize: '14.5px', padding: '11px 14px', minHeight: '46px', background: 'rgba(0,0,0,0.3)', color: 'var(--accent-cyan)', fontWeight: '700' }}
                     value={`Day ${selectedDynamicProtocolDay}`}
                     disabled
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  style={{ fontSize: '11px', padding: '5px 10px' }}
+                  style={{ fontSize: '13px', padding: '8px 14px', minHeight: '40px' }}
                   onClick={() => setIsInlineLogOpen(false)}
                 >
                   Cancel
@@ -747,7 +747,7 @@ export default function DosingCalendarView({
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ fontSize: '11px', padding: '5px 14px' }}
+                  style={{ fontSize: '13px', padding: '8px 18px', minHeight: '40px' }}
                 >
                   ✓ Save Dose
                 </button>
@@ -806,11 +806,11 @@ export default function DosingCalendarView({
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        style={{ padding: '4px 8px', fontSize: '11px', color: 'var(--accent-cyan)' }}
+                        style={{ padding: '6px 12px', fontSize: '12px', minHeight: '36px', color: 'var(--accent-cyan)' }}
                         onClick={() => handleStartEditDose(log)}
                         title="Edit dose"
                       >
@@ -819,7 +819,7 @@ export default function DosingCalendarView({
                       <button
                         type="button"
                         className="btn btn-danger"
-                        style={{ padding: '4px 8px', fontSize: '11px' }}
+                        style={{ padding: '6px 12px', fontSize: '12px', minHeight: '36px' }}
                         onClick={() => handleDeleteDoseFromCalendar(log.id)}
                         title="Delete dose"
                       >
@@ -833,15 +833,15 @@ export default function DosingCalendarView({
           </div>
 
           {/* SECTION 2: SUBJECTIVE WELLNESS & INSIGHTS FOR THIS DAY */}
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '700', color: '#fff' }}>
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <span style={{ fontSize: '14px', fontWeight: '800', color: '#fff' }}>
                 🌸 Daily Insights & Physiological Wellness
               </span>
               <button
                 type="button"
                 className="btn btn-secondary"
-                style={{ fontSize: '11px', padding: '4px 10px' }}
+                style={{ fontSize: '12.5px', padding: '6px 12px', minHeight: '36px' }}
                 onClick={() => setIsEditingWellness(!isEditingWellness)}
               >
                 {isEditingWellness ? '✕ Cancel' : selectedDayWellness ? '✏️ Edit Insights' : '+ Add Insights'}
@@ -850,87 +850,87 @@ export default function DosingCalendarView({
 
             {!isEditingWellness ? (
               selectedDayWellness ? (
-                <div style={{ background: 'rgba(255, 182, 193, 0.04)', border: '1px solid rgba(255, 182, 193, 0.2)', padding: '14px', borderRadius: '10px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '10px' }}>
-                    <div style={{ fontSize: '11.5px' }}>
+                <div style={{ background: 'rgba(244, 114, 182, 0.06)', border: '1px solid rgba(244, 114, 182, 0.25)', padding: '16px', borderRadius: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '12.5px' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Energy: </span>
-                      <strong style={{ color: 'var(--accent-cyan)' }}>{selectedDayWellness.energy_rating}/10</strong>
+                      <strong style={{ color: 'var(--accent-cyan)', fontSize: '13.5px' }}>{selectedDayWellness.energy_rating}/10</strong>
                     </div>
-                    <div style={{ fontSize: '11.5px' }}>
+                    <div style={{ fontSize: '12.5px' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Mood: </span>
-                      <strong style={{ color: 'var(--accent-pink)' }}>{selectedDayWellness.mood_rating}/10</strong>
+                      <strong style={{ color: 'var(--accent-pink)', fontSize: '13.5px' }}>{selectedDayWellness.mood_rating}/10</strong>
                     </div>
-                    <div style={{ fontSize: '11.5px' }}>
+                    <div style={{ fontSize: '12.5px' }}>
                       <span style={{ color: 'var(--text-muted)' }}>Libido: </span>
-                      <strong style={{ color: 'var(--accent-purple)' }}>{selectedDayWellness.libido || 7}/10</strong>
+                      <strong style={{ color: 'var(--accent-purple)', fontSize: '13.5px' }}>{selectedDayWellness.libido || 7}/10</strong>
                     </div>
                   </div>
 
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                     Skin / Reaction: <strong style={{ color: '#fff' }}>{selectedDayWellness.skin_sensitivity || 'Normal'}</strong>
                   </div>
 
                   {selectedDayWellness.notes && (
-                    <div style={{ fontSize: '12.5px', color: 'var(--text-main)', fontStyle: 'italic', background: 'rgba(0,0,0,0.2)', padding: '8px 10px', borderRadius: '6px', marginTop: '6px' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-main)', fontStyle: 'italic', background: 'rgba(0,0,0,0.25)', padding: '10px 12px', borderRadius: '8px', marginTop: '8px' }}>
                       "{selectedDayWellness.notes}"
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12.5px' }}>
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                   No wellness telemetry recorded for this day. Click <strong>"+ Add Insights"</strong> to record how you felt.
                 </div>
               )
             ) : (
               /* Inline Wellness Form */
-              <form onSubmit={handleSaveDayWellness} style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '10px', border: '1px solid var(--accent-pink)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+              <form onSubmit={handleSaveDayWellness} style={{ background: 'rgba(0,0,0,0.35)', padding: '18px', borderRadius: '12px', border: '1px solid var(--accent-pink)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label className="input-label" style={{ fontSize: '11px' }}>Energy ({wellnessForm.energy_rating}/10)</label>
+                    <label className="input-label" style={{ fontSize: '12px' }}>Energy ({wellnessForm.energy_rating}/10)</label>
                     <input
                       type="range" min="1" max="10"
                       value={wellnessForm.energy_rating}
                       onChange={(e) => setWellnessForm({ ...wellnessForm, energy_rating: e.target.value })}
-                      style={{ width: '100%', accentColor: 'var(--accent-cyan)' }}
+                      style={{ width: '100%', accentColor: 'var(--accent-cyan)', height: '8px' }}
                     />
                   </div>
                   <div>
-                    <label className="input-label" style={{ fontSize: '11px' }}>Mood ({wellnessForm.mood_rating}/10)</label>
+                    <label className="input-label" style={{ fontSize: '12px' }}>Mood ({wellnessForm.mood_rating}/10)</label>
                     <input
                       type="range" min="1" max="10"
                       value={wellnessForm.mood_rating}
                       onChange={(e) => setWellnessForm({ ...wellnessForm, mood_rating: e.target.value })}
-                      style={{ width: '100%', accentColor: 'var(--accent-pink)' }}
+                      style={{ width: '100%', accentColor: 'var(--accent-pink)', height: '8px' }}
                     />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                   <div>
-                    <label className="input-label" style={{ fontSize: '11px' }}>Libido ({wellnessForm.libido}/10)</label>
+                    <label className="input-label" style={{ fontSize: '12px' }}>Libido ({wellnessForm.libido}/10)</label>
                     <input
                       type="range" min="1" max="10"
                       value={wellnessForm.libido}
                       onChange={(e) => setWellnessForm({ ...wellnessForm, libido: e.target.value })}
-                      style={{ width: '100%', accentColor: 'var(--accent-purple)' }}
+                      style={{ width: '100%', accentColor: 'var(--accent-purple)', height: '8px' }}
                     />
                   </div>
                   <div>
-                    <label className="input-label" style={{ fontSize: '11px' }}>Orgasm ({wellnessForm.orgasm_strength}/10)</label>
+                    <label className="input-label" style={{ fontSize: '12px' }}>Orgasm ({wellnessForm.orgasm_strength}/10)</label>
                     <input
                       type="range" min="1" max="10"
                       value={wellnessForm.orgasm_strength}
                       onChange={(e) => setWellnessForm({ ...wellnessForm, orgasm_strength: e.target.value })}
-                      style={{ width: '100%', accentColor: 'var(--accent-pink)' }}
+                      style={{ width: '100%', accentColor: 'var(--accent-pink)', height: '8px' }}
                     />
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '10px' }}>
-                  <label className="input-label" style={{ fontSize: '11px' }}>Skin / Injection Sensitivity</label>
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="input-label" style={{ fontSize: '12px' }}>Skin / Injection Sensitivity</label>
                   <select
                     className="select-field"
-                    style={{ fontSize: '12px', padding: '6px 10px' }}
+                    style={{ fontSize: '14px', padding: '10px 12px', minHeight: '46px' }}
                     value={wellnessForm.skin_sensitivity}
                     onChange={(e) => setWellnessForm({ ...wellnessForm, skin_sensitivity: e.target.value })}
                   >
@@ -940,28 +940,28 @@ export default function DosingCalendarView({
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label className="input-label" style={{ fontSize: '11px' }}>Day Notes / Sensation Insights</label>
+                <div style={{ marginBottom: '14px' }}>
+                  <label className="input-label" style={{ fontSize: '12px' }}>Day Notes / Sensation Insights</label>
                   <input
                     type="text"
                     className="input-field"
-                    style={{ fontSize: '12px' }}
+                    style={{ fontSize: '14px', padding: '10px 12px', minHeight: '46px' }}
                     placeholder="e.g. Energy peaked mid-afternoon, optimal recovery."
                     value={wellnessForm.notes}
                     onChange={(e) => setWellnessForm({ ...wellnessForm, notes: e.target.value })}
                   />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    style={{ fontSize: '11.5px', padding: '6px 12px' }}
+                    style={{ fontSize: '13px', padding: '8px 14px', minHeight: '40px' }}
                     onClick={() => setIsEditingWellness(false)}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary" style={{ fontSize: '11.5px', padding: '6px 16px' }}>
+                  <button type="submit" className="btn btn-primary" style={{ fontSize: '13px', padding: '8px 18px', minHeight: '40px' }}>
                     ✓ Save Day Insights
                   </button>
                 </div>
@@ -977,21 +977,22 @@ export default function DosingCalendarView({
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <h3 style={{ fontSize: '20px', fontWeight: '800', margin: 0, color: '#fff' }}>
+                <h3 style={{ fontSize: '22px', fontWeight: '800', margin: 0, color: '#fff' }}>
                   + Add Missed Dose for {selectedDateStr}
                 </h3>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
                   Protocol Day {selectedDynamicProtocolDay} automatically calculated from your earliest logged date.
                 </p>
               </div>
               <button className="modal-close" onClick={() => setIsMissedModalOpen(false)}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveMissedDose} style={{ marginTop: '16px' }}>
-              <div style={{ marginBottom: '14px' }}>
+            <form onSubmit={handleSaveMissedDose} style={{ marginTop: '18px' }}>
+              <div style={{ marginBottom: '16px' }}>
                 <label className="input-label">Select Active Protocol</label>
                 <select
                   className="select-field"
+                  style={{ minHeight: '48px', fontSize: '15px' }}
                   value={doseForm.protocolId}
                   onChange={(e) => {
                     const sel = injections.find(i => i.id === e.target.value);
@@ -1011,11 +1012,12 @@ export default function DosingCalendarView({
               </div>
 
               {doseForm.protocolId === 'custom' && (
-                <div style={{ marginBottom: '14px' }}>
+                <div style={{ marginBottom: '16px' }}>
                   <label className="input-label">Custom Compound Name</label>
                   <input
                     type="text"
                     className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={doseForm.name}
                     onChange={(e) => setDoseForm({ ...doseForm, name: e.target.value })}
                     placeholder="e.g. BPC-157"
@@ -1024,12 +1026,13 @@ export default function DosingCalendarView({
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
                 <div>
                   <label className="input-label">Dose</label>
                   <input
                     type="text"
                     className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={doseForm.dose}
                     onChange={(e) => setDoseForm({ ...doseForm, dose: e.target.value })}
                     placeholder="e.g. 500 mcg"
@@ -1041,6 +1044,7 @@ export default function DosingCalendarView({
                   <label className="input-label">Anatomical Site</label>
                   <select
                     className="select-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={doseForm.site}
                     onChange={(e) => setDoseForm({ ...doseForm, site: e.target.value })}
                   >
@@ -1051,12 +1055,13 @@ export default function DosingCalendarView({
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
                 <div>
                   <label className="input-label">Time</label>
                   <input
                     type="time"
                     className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={doseForm.time}
                     onChange={(e) => setDoseForm({ ...doseForm, time: e.target.value })}
                     required
@@ -1067,22 +1072,23 @@ export default function DosingCalendarView({
                   <input
                     type="text"
                     className="input-field"
-                    style={{ background: 'rgba(0,0,0,0.3)', color: 'var(--accent-cyan)', fontWeight: '700' }}
+                    style={{ minHeight: '48px', fontSize: '15px', background: 'rgba(0,0,0,0.3)', color: 'var(--accent-cyan)', fontWeight: '700' }}
                     value={`Day ${selectedDynamicProtocolDay}`}
                     disabled
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
+                  style={{ minHeight: '46px', padding: '10px 18px', fontSize: '14px' }}
                   onClick={() => setIsMissedModalOpen(false)}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary" style={{ minHeight: '46px', padding: '10px 22px', fontSize: '14px' }}>
                   ✓ Add Dose to Calendar
                 </button>
               </div>

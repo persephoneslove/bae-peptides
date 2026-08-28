@@ -661,18 +661,39 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <div>
-                  <label className="bio-label">Administration Frequency</label>
+                  <label className="bio-label">Administration Frequency & Schedule</label>
                   <select
                     className="bio-select"
                     value={formData.frequency}
-                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      let daysOn = formData.cycle_days_on;
+                      let daysOff = formData.cycle_days_off;
+                      if (val.includes('7 Days') || val.includes('Daily Continuous')) {
+                        daysOn = '7';
+                        daysOff = '0';
+                      } else if (val.includes('6 Days')) {
+                        daysOn = '6';
+                        daysOff = '1';
+                      } else if (val.includes('5 Days')) {
+                        daysOn = '5';
+                        daysOff = '2';
+                      } else if (val.includes('Every Other Day')) {
+                        daysOn = '1';
+                        daysOff = '1';
+                      }
+                      setFormData({ ...formData, frequency: val, cycle_days_on: daysOn, cycle_days_off: daysOff });
+                    }}
                   >
-                    <option value="Daily (AM)">Daily (AM)</option>
-                    <option value="Daily (PM)">Daily (PM)</option>
+                    <option value="7 Days On / 0 Days Off (Daily Continuous)">7 Days On / 0 Days Off (Daily Continuous)</option>
+                    <option value="Daily (AM)">Daily (AM) - Continuous</option>
+                    <option value="Daily (PM)">Daily (PM) - Continuous</option>
                     <option value="Twice Daily (AM/PM)">Twice Daily (AM/PM)</option>
+                    <option value="6 Days On / 1 Day Off">6 Days On / 1 Day Off</option>
+                    <option value="5 Days On / 2 Days Off">5 Days On / 2 Days Off</option>
+                    <option value="Every Other Day (EOD)">Every Other Day (EOD)</option>
                     <option value="3x / Week">3x / Week (Mon/Wed/Fri)</option>
                     <option value="2x / Week">2x / Week (Mon/Thu)</option>
-                    <option value="5 Days On / 2 Days Off">5 Days On / 2 Days Off</option>
                     <option value="Once Weekly">Once Weekly</option>
                     <option value="As Needed / Acute">As Needed / Acute</option>
                   </select>
