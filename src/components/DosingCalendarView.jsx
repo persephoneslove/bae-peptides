@@ -10,12 +10,14 @@ import {
 const INJECTION_SITES = [
   { id: 'ab-left', name: 'Left Abdomen (SubQ)' },
   { id: 'ab-right', name: 'Right Abdomen (SubQ)' },
-  { id: 'delt-left', name: 'Left Deltoid (IM / SubQ)' },
-  { id: 'delt-right', name: 'Right Deltoid (IM / SubQ)' },
-  { id: 'glute-left', name: 'Left Ventrogluteal (IM)' },
-  { id: 'glute-right', name: 'Right Ventrogluteal (IM)' },
-  { id: 'quad-left', name: 'Left Vastus Lateralis (IM)' },
-  { id: 'quad-right', name: 'Right Vastus Lateralis (IM)' }
+  { id: 'flank-left', name: 'Left Love Handle / Flank (SubQ)' },
+  { id: 'flank-right', name: 'Right Love Handle / Flank (SubQ)' },
+  { id: 'thigh-left', name: 'Left Thigh (SubQ)' },
+  { id: 'thigh-right', name: 'Right Thigh (SubQ)' },
+  { id: 'glute-left', name: 'Left Glute / Buttock (SubQ)' },
+  { id: 'glute-right', name: 'Right Glute / Buttock (SubQ)' },
+  { id: 'delt-left', name: 'Left Deltoid / Arm (SubQ)' },
+  { id: 'delt-right', name: 'Right Deltoid / Arm (SubQ)' }
 ];
 
 const SKIN_SENSITIVITY_OPTIONS = [

@@ -2,58 +2,60 @@ import React, { useState } from 'react';
 import { sound } from '../utils/audio';
 import { getStorageData, setStorageData, initialData } from '../utils/storage';
 
-const INJECTION_SITES = [
-  { id: 'ab-left', name: 'Left Abdomen (SubQ)', area: 'Abdominal', icon: '📍' },
-  { id: 'ab-right', name: 'Right Abdomen (SubQ)', area: 'Abdominal', icon: '📍' },
-  { id: 'delt-left', name: 'Left Deltoid (IM / SubQ)', area: 'Upper Arm', icon: '📍' },
-  { id: 'delt-right', name: 'Right Deltoid (IM / SubQ)', area: 'Upper Arm', icon: '📍' },
-  { id: 'glute-left', name: 'Left Ventrogluteal (IM)', area: 'Gluteal', icon: '📍' },
-  { id: 'glute-right', name: 'Right Ventrogluteal (IM)', area: 'Gluteal', icon: '📍' },
-  { id: 'quad-left', name: 'Left Vastus Lateralis (IM)', area: 'Thigh', icon: '📍' },
-  { id: 'quad-right', name: 'Right Vastus Lateralis (IM)', area: 'Thigh', icon: '📍' }
+export const INJECTION_SITES = [
+  { id: 'ab-left', name: 'Left Abdomen (SubQ)', area: 'Abdominal', coords: 'Left Umbilicus 2in', icon: '📍' },
+  { id: 'ab-right', name: 'Right Abdomen (SubQ)', area: 'Abdominal', coords: 'Right Umbilicus 2in', icon: '📍' },
+  { id: 'flank-left', name: 'Left Love Handle / Flank (SubQ)', area: 'Love Handle / Flank', coords: 'Lateral Iliac Crest Left', icon: '📍' },
+  { id: 'flank-right', name: 'Right Love Handle / Flank (SubQ)', area: 'Love Handle / Flank', coords: 'Lateral Iliac Crest Right', icon: '📍' },
+  { id: 'thigh-left', name: 'Left Thigh (SubQ)', area: 'Thigh', coords: 'Anterior / Outer Thigh Left', icon: '📍' },
+  { id: 'thigh-right', name: 'Right Thigh (SubQ)', area: 'Thigh', coords: 'Anterior / Outer Thigh Right', icon: '📍' },
+  { id: 'glute-left', name: 'Left Glute / Buttock (SubQ)', area: 'Gluteal', coords: 'Upper Outer Quadrant Left', icon: '📍' },
+  { id: 'glute-right', name: 'Right Glute / Buttock (SubQ)', area: 'Gluteal', coords: 'Upper Outer Quadrant Right', icon: '📍' },
+  { id: 'delt-left', name: 'Left Deltoid / Arm (SubQ)', area: 'Upper Arm', coords: 'Tricep / Lateral Deltoid Left', icon: '📍' },
+  { id: 'delt-right', name: 'Right Deltoid / Arm (SubQ)', area: 'Upper Arm', coords: 'Tricep / Lateral Deltoid Right', icon: '📍' }
 ];
 
 export const POPULAR_PEPTIDE_LIBRARY = [
   // User Requested Key Compounds
-  { name: 'KLOW Blend (Klotho / KPV / BPC / GHK Ultimate Repair)', dose: '500 mcg', units: 20, frequency: 'Daily (AM)', timing: 'Morning Fasted', category: 'Cellular Youth & Tissue Regeneration', vialMg: 10, bacWaterMl: 2.0, color: '#00f2fe', halfLifeHours: 12.0 },
-  { name: 'SS-31 (Elamipretide Cardiolipin Targeter)', dose: '4.0 mg', units: 40, frequency: 'Daily (AM)', timing: 'Morning', category: 'Mitochondrial Inner Membrane ATP', vialMg: 50, bacWaterMl: 5.0, color: '#05ffa1', halfLifeHours: 4.5 },
-  { name: 'MOTS-c (Mitochondrial ORF 12S rRNA)', dose: '5.0 mg', units: 50, frequency: '3x / Week', timing: 'Pre-Workout Fasted', category: 'Metabolic & Mitochondrial Biogenesis', vialMg: 10, bacWaterMl: 2.0, color: '#ffb703', halfLifeHours: 4.0 },
+  { name: 'KLOW Blend (Klotho / KPV / BPC / GHK Ultimate Repair)', dose: '500 mcg', units: 20, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning Fasted', category: 'Cellular Youth & Tissue Regeneration', vialMg: 10, bacWaterMl: 2.0, color: '#38bdf8', halfLifeHours: 12.0 },
+  { name: 'SS-31 (Elamipretide Cardiolipin Targeter)', dose: '4.0 mg', units: 40, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning', category: 'Mitochondrial Inner Membrane ATP', vialMg: 50, bacWaterMl: 5.0, color: '#6ee7b7', halfLifeHours: 4.5 },
+  { name: 'MOTS-c (Mitochondrial ORF 12S rRNA)', dose: '5.0 mg', units: 50, frequency: '3x / Week', timing: 'Pre-Workout Fasted', category: 'Metabolic & Mitochondrial Biogenesis', vialMg: 10, bacWaterMl: 2.0, color: '#fbbf24', halfLifeHours: 4.0 },
   
   // Weight & Metabolic Next-Gen
-  { name: 'Retatrutide (Triple G - GLP-1/GIP/Glucagon)', dose: '2.0 mg', units: 20, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Metabolic & Fat Oxidation', vialMg: 10, bacWaterMl: 2.0, color: '#00f2fe', halfLifeHours: 144.0 },
-  { name: 'Tirzepatide (Mounjaro / Zepbound GLP-1/GIP)', dose: '2.5 mg', units: 25, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Glucose & Satiety', vialMg: 10, bacWaterMl: 2.0, color: '#05ffa1', halfLifeHours: 120.0 },
-  { name: 'Semaglutide (Ozempic / Wegovy GLP-1)', dose: '0.25 mg', units: 10, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Appetite & Insulin Regulation', vialMg: 5, bacWaterMl: 2.0, color: '#05ffa1', halfLifeHours: 168.0 },
-  { name: 'Cagrilintide (Long-Acting Amylin Analog)', dose: '0.3 mg', units: 15, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Amylin Satiety Agonist', vialMg: 5, bacWaterMl: 2.5, color: '#ff2a6d', halfLifeHours: 160.0 },
-  { name: 'AOD-9604 (Lipolytic GH Fragment 176-191)', dose: '300 mcg', units: 15, frequency: 'Daily Fasted', timing: 'Morning / Pre-Cardio', category: 'Targeted Adipose Lipolysis', vialMg: 5, bacWaterMl: 2.5, color: '#ffb703', halfLifeHours: 1.5 },
-  { name: '5-Amino-1MQ (NNMT Inhibitor)', dose: '50 mg', units: 50, frequency: 'Daily (AM)', timing: 'Morning Fasted', category: 'Intracellular NAD+ & Fat Metabolism', vialMg: 500, bacWaterMl: 5.0, color: '#9d4edd', halfLifeHours: 6.0 },
+  { name: 'Retatrutide (Triple G - GLP-1/GIP/Glucagon)', dose: '2.0 mg', units: 20, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Metabolic & Fat Oxidation', vialMg: 10, bacWaterMl: 2.0, color: '#38bdf8', halfLifeHours: 144.0 },
+  { name: 'Tirzepatide (Mounjaro / Zepbound GLP-1/GIP)', dose: '2.5 mg', units: 25, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Glucose & Satiety', vialMg: 10, bacWaterMl: 2.0, color: '#6ee7b7', halfLifeHours: 120.0 },
+  { name: 'Semaglutide (Ozempic / Wegovy GLP-1)', dose: '0.25 mg', units: 10, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Appetite & Insulin Regulation', vialMg: 5, bacWaterMl: 2.0, color: '#6ee7b7', halfLifeHours: 168.0 },
+  { name: 'Cagrilintide (Long-Acting Amylin Analog)', dose: '0.3 mg', units: 15, frequency: 'Once Weekly', timing: 'Morning Fasted', category: 'Amylin Satiety Agonist', vialMg: 5, bacWaterMl: 2.5, color: '#f472b6', halfLifeHours: 160.0 },
+  { name: 'AOD-9604 (Lipolytic GH Fragment 176-191)', dose: '300 mcg', units: 15, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning / Pre-Cardio', category: 'Targeted Adipose Lipolysis', vialMg: 5, bacWaterMl: 2.5, color: '#fbbf24', halfLifeHours: 1.5 },
+  { name: '5-Amino-1MQ (NNMT Inhibitor)', dose: '50 mg', units: 50, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning Fasted', category: 'Intracellular NAD+ & Fat Metabolism', vialMg: 500, bacWaterMl: 5.0, color: '#c084fc', halfLifeHours: 6.0 },
 
   // Tissue Healing & Regenerative
-  { name: 'BPC-157 (Body Protection Compound)', dose: '250 mcg', units: 10, frequency: 'Twice Daily (AM/PM)', timing: 'AM / PM', category: 'Gut, Tendon & Angiogenesis', vialMg: 5, bacWaterMl: 2.0, color: '#00f2fe', halfLifeHours: 4.0 },
-  { name: 'TB-500 (Thymosin Beta-4 Systemic)', dose: '2.5 mg', units: 50, frequency: '2x / Week', timing: 'Evening', category: 'Systemic Repair & Actin Cytoskeleton', vialMg: 10, bacWaterMl: 2.0, color: '#ff2a6d', halfLifeHours: 48.0 },
-  { name: 'GHK-Cu (Copper Peptide Tripeptide-1)', dose: '2.0 mg', units: 20, frequency: 'Daily (AM)', timing: 'Morning', category: 'Skin, Decorin & Gene Remodeling', vialMg: 50, bacWaterMl: 5.0, color: '#00f2fe', halfLifeHours: 1.0 },
-  { name: 'KPV (Alpha-MSH Tripeptide)', dose: '300 mcg', units: 15, frequency: 'Daily (AM/PM)', timing: 'Morning', category: 'Gut Mucosa & Anti-Inflammatory', vialMg: 5, bacWaterMl: 2.5, color: '#05ffa1', halfLifeHours: 2.0 },
+  { name: 'BPC-157 (Body Protection Compound)', dose: '250 mcg', units: 10, frequency: 'Twice Daily (AM/PM)', timing: 'AM / PM', category: 'Gut, Tendon & Angiogenesis', vialMg: 5, bacWaterMl: 2.0, color: '#38bdf8', halfLifeHours: 4.0 },
+  { name: 'TB-500 (Thymosin Beta-4 Systemic)', dose: '2.5 mg', units: 50, frequency: '2x / Week', timing: 'Evening', category: 'Systemic Repair & Actin Cytoskeleton', vialMg: 10, bacWaterMl: 2.0, color: '#f472b6', halfLifeHours: 48.0 },
+  { name: 'GHK-Cu (Copper Peptide Tripeptide-1)', dose: '2.0 mg', units: 20, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning', category: 'Skin, Decorin & Gene Remodeling', vialMg: 50, bacWaterMl: 5.0, color: '#38bdf8', halfLifeHours: 1.0 },
+  { name: 'KPV (Alpha-MSH Tripeptide)', dose: '300 mcg', units: 15, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning', category: 'Gut Mucosa & Anti-Inflammatory', vialMg: 5, bacWaterMl: 2.5, color: '#6ee7b7', halfLifeHours: 2.0 },
 
   // Longevity & Immune
-  { name: 'Epithalon (Epithalamin Pineal Bioregulator)', dose: '10 mg', units: 50, frequency: 'Daily (10-20 Day Cycle)', timing: 'Bedtime', category: 'Telomerase Activation & Circadian Clock', vialMg: 50, bacWaterMl: 5.0, color: '#9d4edd', halfLifeHours: 2.5 },
-  { name: 'Thymosin Alpha-1 (TA-1 / Zadaxin)', dose: '1.5 mg', units: 30, frequency: '2x / Week', timing: 'Morning', category: 'Immune Modulation & T-Cell Defense', vialMg: 10, bacWaterMl: 2.0, color: '#05ffa1', halfLifeHours: 2.0 },
-  { name: 'NAD+ (Nicotinamide Adenine Dinucleotide)', dose: '50 mg', units: 50, frequency: '3x / Week', timing: 'Morning Fasted', category: 'Cellular ATP & DNA Repair', vialMg: 500, bacWaterMl: 5.0, color: '#00f2fe', halfLifeHours: 3.0 },
-  { name: 'FoxO4-DRI (Targeted Senolytic Peptide)', dose: '3.0 mg', units: 30, frequency: '3x / Week (Pulse Cycle)', timing: 'Morning', category: 'Senescent Zombie Cell Clearance', vialMg: 10, bacWaterMl: 1.0, color: '#ff2a6d', halfLifeHours: 4.0 },
+  { name: 'Epithalon (Epithalamin Pineal Bioregulator)', dose: '10 mg', units: 50, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Bedtime', category: 'Telomerase Activation & Circadian Clock', vialMg: 50, bacWaterMl: 5.0, color: '#c084fc', halfLifeHours: 2.5 },
+  { name: 'Thymosin Alpha-1 (TA-1 / Zadaxin)', dose: '1.5 mg', units: 30, frequency: '2x / Week', timing: 'Morning', category: 'Immune Modulation & T-Cell Defense', vialMg: 10, bacWaterMl: 2.0, color: '#6ee7b7', halfLifeHours: 2.0 },
+  { name: 'NAD+ (Nicotinamide Adenine Dinucleotide)', dose: '50 mg', units: 50, frequency: '3x / Week', timing: 'Morning Fasted', category: 'Cellular ATP & DNA Repair', vialMg: 500, bacWaterMl: 5.0, color: '#38bdf8', halfLifeHours: 3.0 },
+  { name: 'FoxO4-DRI (Targeted Senolytic Peptide)', dose: '3.0 mg', units: 30, frequency: '3x / Week (Pulse Cycle)', timing: 'Morning', category: 'Senescent Zombie Cell Clearance', vialMg: 10, bacWaterMl: 1.0, color: '#f472b6', halfLifeHours: 4.0 },
 
   // Growth Hormone & Sleep
-  { name: 'CJC-1295 (No DAC) / Ipamorelin Blend', dose: '300 mcg', units: 15, frequency: '5 Days On / 2 Days Off', timing: 'Bedtime (Fasted)', category: 'Natural Pituitary GH Secretagogue', vialMg: 5, bacWaterMl: 2.5, color: '#9d4edd', halfLifeHours: 1.5 },
-  { name: 'Tesamorelin (Egrifta GHRH Analog)', dose: '1.0 mg', units: 20, frequency: 'Daily (Bedtime Fasted)', timing: 'Bedtime', category: 'Visceral Fat & IGF-1 Optimization', vialMg: 10, bacWaterMl: 2.0, color: '#ffb703', halfLifeHours: 0.5 },
-  { name: 'Sermorelin (GHRH 1-29)', dose: '500 mcg', units: 25, frequency: 'Bedtime Fasted', timing: 'Bedtime', category: 'Slow-Wave Sleep & Collagen Renewal', vialMg: 5, bacWaterMl: 2.5, color: '#9d4edd', halfLifeHours: 0.5 },
-  { name: 'Hexarelin (Potent GHRP & Cardioprotective)', dose: '100 mcg', units: 10, frequency: 'Pre-Workout / AM', timing: 'Morning Fasted', category: 'GH Secretion & Cardiac Perfusion', vialMg: 5, bacWaterMl: 5.0, color: '#ff2a6d', halfLifeHours: 1.2 },
+  { name: 'CJC-1295 (No DAC) / Ipamorelin Blend', dose: '300 mcg', units: 15, frequency: '5 Days On / 2 Days Off', timing: 'Bedtime (Fasted)', category: 'Natural Pituitary GH Secretagogue', vialMg: 5, bacWaterMl: 2.5, color: '#c084fc', halfLifeHours: 1.5 },
+  { name: 'Tesamorelin (Egrifta GHRH Analog)', dose: '1.0 mg', units: 20, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Bedtime', category: 'Visceral Fat & IGF-1 Optimization', vialMg: 10, bacWaterMl: 2.0, color: '#fbbf24', halfLifeHours: 0.5 },
+  { name: 'Sermorelin (GHRH 1-29)', dose: '500 mcg', units: 25, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Bedtime', category: 'Slow-Wave Sleep & Collagen Renewal', vialMg: 5, bacWaterMl: 2.5, color: '#c084fc', halfLifeHours: 0.5 },
+  { name: 'Hexarelin (Potent GHRP & Cardioprotective)', dose: '100 mcg', units: 10, frequency: 'Pre-Workout / AM', timing: 'Morning Fasted', category: 'GH Secretion & Cardiac Perfusion', vialMg: 5, bacWaterMl: 5.0, color: '#f472b6', halfLifeHours: 1.2 },
 
   // Brain & Nootropic
-  { name: 'Semax (Heptapeptide ACTH 4-10 Analog)', dose: '600 mcg', units: 12, frequency: 'Daily (AM)', timing: 'Morning', category: 'BDNF, TrkB & Cognitive Focus', vialMg: 10, bacWaterMl: 2.0, color: '#00f2fe', halfLifeHours: 0.5 },
-  { name: 'Selank (Synthetic Tuftsin Analog)', dose: '500 mcg', units: 10, frequency: 'As Needed (AM/PM)', timing: 'Morning / Afternoon', category: 'GABAergic Anxiolytic & Neuro-Calm', vialMg: 10, bacWaterMl: 2.0, color: '#05ffa1', halfLifeHours: 0.4 },
-  { name: 'Dihexa (Potent Synaptogenic Oligopeptide)', dose: '10 mg', units: 20, frequency: 'Daily (AM)', timing: 'Morning', category: 'HGF Mimic & Synaptic Arborization', vialMg: 50, bacWaterMl: 5.0, color: '#ffb703', halfLifeHours: 8.0 },
+  { name: 'Semax (Heptapeptide ACTH 4-10 Analog)', dose: '600 mcg', units: 12, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning', category: 'BDNF, TrkB & Cognitive Focus', vialMg: 10, bacWaterMl: 2.0, color: '#38bdf8', halfLifeHours: 0.5 },
+  { name: 'Selank (Synthetic Tuftsin Analog)', dose: '500 mcg', units: 10, frequency: 'As Needed (AM/PM)', timing: 'Morning / Afternoon', category: 'GABAergic Anxiolytic & Neuro-Calm', vialMg: 10, bacWaterMl: 2.0, color: '#6ee7b7', halfLifeHours: 0.4 },
+  { name: 'Dihexa (Potent Synaptogenic Oligopeptide)', dose: '10 mg', units: 20, frequency: '7 Days On / 0 Days Off (Daily Continuous)', timing: 'Morning', category: 'HGF Mimic & Synaptic Arborization', vialMg: 50, bacWaterMl: 5.0, color: '#fbbf24', halfLifeHours: 8.0 },
 
   // Sexual Health & Melanocortin
-  { name: 'PT-141 (Bremelanotide SubQ)', dose: '1.5 mg', units: 30, frequency: 'As Needed (2-4h prior)', timing: 'Evening', category: 'Melanocortin MC3/MC4 Libido Agonist', vialMg: 10, bacWaterMl: 2.0, color: '#ff2a6d', halfLifeHours: 2.7 },
-  { name: 'Kisspeptin-10 (GnRH Agonist)', dose: '200 mcg', units: 20, frequency: '2x / Week', timing: 'Bedtime', category: 'Hypothalamic LH/FSH & Testosterone Pulse', vialMg: 5, bacWaterMl: 5.0, color: '#9d4edd', halfLifeHours: 0.8 },
-  { name: 'Melanotan II (MT-2 Melanocortin)', dose: '250 mcg', units: 10, frequency: '2-3x / Week', timing: 'Pre-UV / Bedtime', category: 'Melanogenesis & Skin Pigmentation', vialMg: 10, bacWaterMl: 2.0, color: '#ffb703', halfLifeHours: 1.5 }
+  { name: 'PT-141 (Bremelanotide SubQ)', dose: '1.5 mg', units: 30, frequency: 'As Needed (2-4h prior)', timing: 'Evening', category: 'Melanocortin MC3/MC4 Libido Agonist', vialMg: 10, bacWaterMl: 2.0, color: '#f472b6', halfLifeHours: 2.7 },
+  { name: 'Kisspeptin-10 (GnRH Agonist)', dose: '200 mcg', units: 20, frequency: '2x / Week', timing: 'Bedtime', category: 'Hypothalamic LH/FSH & Testosterone Pulse', vialMg: 5, bacWaterMl: 5.0, color: '#c084fc', halfLifeHours: 0.8 },
+  { name: 'Melanotan II (MT-2 Melanocortin)', dose: '250 mcg', units: 10, frequency: '2-3x / Week', timing: 'Pre-UV / Bedtime', category: 'Melanogenesis & Skin Pigmentation', vialMg: 10, bacWaterMl: 2.0, color: '#fbbf24', halfLifeHours: 1.5 }
 ];
 
 export default function InjectionManager({ injections, onUpdateInjections, onLogQuickDose }) {
@@ -73,13 +75,13 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
     name: '',
     dose: '250 mcg',
     units: 10,
-    frequency: 'Daily (AM)',
+    frequency: '7 Days On / 0 Days Off (Daily Continuous)',
     timing: 'Morning Fasted',
     category: 'Targeted Longevity',
     vialMg: 5,
     bacWaterMl: 2.0,
     halfLifeHours: 4.0,
-    color: '#00f2fe'
+    color: '#38bdf8'
   });
 
   // Protocol Add / Edit Form State with Cycle Tracking
@@ -87,17 +89,17 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
     name: '',
     dose: '',
     units: '10',
-    frequency: 'Daily (AM)',
+    frequency: '7 Days On / 0 Days Off (Daily Continuous)',
     timing: 'Morning',
     category: 'Regenerative Healing',
     vialMg: '5',
     bacWaterMl: '2.0',
     stockVials: '2',
-    color: '#00f2fe',
+    color: '#38bdf8',
     start_date: new Date().toISOString().split('T')[0],
     cycle_duration: '30',
-    cycle_days_on: '5',
-    cycle_days_off: '2'
+    cycle_days_on: '7',
+    cycle_days_off: '0'
   });
 
   const handleLogInjection = (item) => {
@@ -110,8 +112,10 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
 
   const handleDeleteCompound = (id) => {
     sound.playAlert();
-    const updated = injections.filter(inj => inj.id !== id);
-    onUpdateInjections(updated);
+    if (window.confirm('Remove this protocol from your active stack?')) {
+      const updated = injections.filter(inj => inj.id !== id);
+      onUpdateInjections(updated);
+    }
   };
 
   const handleOpenEditModal = (item) => {
@@ -121,17 +125,17 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
       name: item.name || '',
       dose: item.dose || '',
       units: (item.units !== undefined ? item.units : 10).toString(),
-      frequency: item.frequency || 'Daily (AM)',
+      frequency: item.frequency || '7 Days On / 0 Days Off (Daily Continuous)',
       timing: item.timing || 'Morning',
       category: item.category || 'Regenerative Healing',
       vialMg: (item.vialMg || 5).toString(),
       bacWaterMl: (item.bacWaterMl || 2.0).toString(),
       stockVials: (item.stockVials || 2).toString(),
-      color: item.color || '#00f2fe',
+      color: item.color || '#38bdf8',
       start_date: item.start_date || new Date().toISOString().split('T')[0],
       cycle_duration: (item.cycle_duration || 30).toString(),
-      cycle_days_on: (item.cycle_days_on || 5).toString(),
-      cycle_days_off: (item.cycle_days_off || 2).toString()
+      cycle_days_on: (item.cycle_days_on !== undefined ? item.cycle_days_on : 7).toString(),
+      cycle_days_off: (item.cycle_days_off !== undefined ? item.cycle_days_off : 0).toString()
     });
     setIsModalOpen(true);
   };
@@ -141,19 +145,19 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
     setEditingCompoundId(null);
     setFormData({
       name: '',
-      dose: '',
+      dose: '250 mcg',
       units: '10',
-      frequency: 'Daily (AM)',
-      timing: 'Morning',
-      category: 'Regenerative Healing',
+      frequency: '7 Days On / 0 Days Off (Daily Continuous)',
+      timing: 'Morning Fasted',
+      category: 'Cellular Longevity',
       vialMg: '5',
       bacWaterMl: '2.0',
       stockVials: '2',
-      color: '#00f2fe',
+      color: '#38bdf8',
       start_date: new Date().toISOString().split('T')[0],
       cycle_duration: '30',
-      cycle_days_on: '5',
-      cycle_days_off: '2'
+      cycle_days_on: '7',
+      cycle_days_off: '0'
     });
     setIsModalOpen(true);
   };
@@ -169,8 +173,8 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
       stockVials: 3,
       start_date: new Date().toISOString().split('T')[0],
       cycle_duration: 30,
-      cycle_days_on: 5,
-      cycle_days_off: 2
+      cycle_days_on: 7,
+      cycle_days_off: 0
     };
     onUpdateInjections([...injections, created]);
     setIsModalOpen(false);
@@ -192,7 +196,7 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
     setCustomPeptides(updatedLib);
     setStorageData(initialData.KEYS.CUSTOM_PEPTIDES, updatedLib);
 
-    // Also offer to add to active stack
+    // Also add to active stack
     const createdProtocol = {
       id: 'inj-' + Date.now(),
       ...newCustom,
@@ -202,8 +206,8 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
       stockVials: 2,
       start_date: new Date().toISOString().split('T')[0],
       cycle_duration: 30,
-      cycle_days_on: 5,
-      cycle_days_off: 2
+      cycle_days_on: 7,
+      cycle_days_off: 0
     };
     onUpdateInjections([...injections, createdProtocol]);
 
@@ -212,13 +216,13 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
       name: '',
       dose: '250 mcg',
       units: 10,
-      frequency: 'Daily (AM)',
+      frequency: '7 Days On / 0 Days Off (Daily Continuous)',
       timing: 'Morning Fasted',
       category: 'Targeted Longevity',
       vialMg: 5,
       bacWaterMl: 2.0,
       halfLifeHours: 4.0,
-      color: '#00f2fe'
+      color: '#38bdf8'
     });
   };
 
@@ -245,8 +249,8 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
             color: formData.color,
             start_date: formData.start_date,
             cycle_duration: parseInt(formData.cycle_duration) || 30,
-            cycle_days_on: parseInt(formData.cycle_days_on) || 5,
-            cycle_days_off: parseInt(formData.cycle_days_off) || 2
+            cycle_days_on: parseInt(formData.cycle_days_on) || 7,
+            cycle_days_off: parseInt(formData.cycle_days_off) !== undefined ? parseInt(formData.cycle_days_off) : 0
           };
         }
         return inj;
@@ -271,8 +275,8 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
         site: 'Left Abdomen (SubQ)',
         start_date: formData.start_date || new Date().toISOString().split('T')[0],
         cycle_duration: parseInt(formData.cycle_duration) || 30,
-        cycle_days_on: parseInt(formData.cycle_days_on) || 5,
-        cycle_days_off: parseInt(formData.cycle_days_off) || 2
+        cycle_days_on: parseInt(formData.cycle_days_on) || 7,
+        cycle_days_off: parseInt(formData.cycle_days_off) !== undefined ? parseInt(formData.cycle_days_off) : 0
       };
       onUpdateInjections([...injections, created]);
     }
@@ -291,50 +295,59 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
   });
 
   return (
-    <div className="animate-fade-in">
-      <div className="view-header">
-        <div className="view-title-group">
-          <h2>Peptide & Injection Command</h2>
-          <p>Add custom protocols, edit dosages & timings, track compound lifecycles (start date & duration), and dynamically manage your compound library.</p>
+    <div style={{ animation: 'popIn 0.25s ease', width: '100%' }}>
+      {/* View Header */}
+      <div className="section-header">
+        <div>
+          <h2>Peptide Protocols & SubQ Command</h2>
+          <p>Manage your active stacks, cycle durations (7 on / 0 off continuous or customized), reconstitution parameters, and rotational subcutaneous sites.</p>
         </div>
-        <div className="quick-actions" style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn-secondary" onClick={() => setIsCustomLibModalOpen(true)}>
-            <span>🧬</span> + New Compound to Library
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary"
+            style={{ fontSize: '14px', padding: '10px 18px', minHeight: '44px' }}
+            onClick={() => setIsCustomLibModalOpen(true)}
+          >
+            🧬 + New Custom Compound
           </button>
-          <button className="btn-primary" onClick={handleOpenAddModal}>
-            <span>+</span> Add Active Protocol
+          <button
+            className="btn btn-primary"
+            style={{ fontSize: '14px', padding: '10px 20px', minHeight: '44px' }}
+            onClick={handleOpenAddModal}
+          >
+            + Add Active Protocol
           </button>
         </div>
       </div>
 
       {/* Featured 1-Click Library Bar */}
-      <div className="glass-panel" style={{ marginBottom: '24px', padding: '16px 20px', border: '1px solid rgba(0, 242, 254, 0.2)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <span style={{ fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--neon-cyan)' }}>
-            ⚡ Dynamic Peptide Library ({combinedLibrary.length} Compounds Ready)
+      <div className="card" style={{ marginBottom: '24px', padding: '20px', border: '1px solid rgba(56, 189, 248, 0.3)', background: 'rgba(22, 30, 44, 0.85)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '12.5px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--accent-cyan)' }}>
+            ⚡ Master Peptide Library ({combinedLibrary.length} Formulations Ready)
           </span>
           <button
-            className="btn-secondary"
-            style={{ fontSize: '11px', padding: '3px 8px' }}
+            className="btn btn-secondary"
+            style={{ fontSize: '12px', padding: '6px 12px', minHeight: '34px' }}
             onClick={() => setIsCustomLibModalOpen(true)}
           >
-            + Create New Compound
+            + Create Custom Formulation
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {combinedLibrary.slice(0, 8).map((lib, idx) => (
             <button
               key={idx}
-              className="btn-secondary"
-              style={{ fontSize: '11.5px', padding: '7px 12px' }}
+              className="btn btn-secondary"
+              style={{ fontSize: '13px', padding: '9px 14px', borderRadius: '10px', minHeight: '40px' }}
               onClick={() => handleQuickAddFromLibrary(lib)}
             >
               + {lib.name.split(' (')[0]} {lib.is_custom ? '⭐' : ''} ({lib.dose})
             </button>
           ))}
           <button
-            className="btn-secondary"
-            style={{ fontSize: '11.5px', padding: '7px 14px', borderColor: 'var(--neon-cyan)', color: 'var(--neon-cyan)', fontWeight: '700' }}
+            className="btn btn-secondary"
+            style={{ fontSize: '13px', padding: '9px 16px', borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)', fontWeight: '700', minHeight: '40px' }}
             onClick={handleOpenAddModal}
           >
             + Browse All {combinedLibrary.length} Compounds...
@@ -343,78 +356,79 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
       </div>
 
       {/* Grid Layout: Active Protocols + Site Rotation Map */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '24px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.45fr) minmax(0, 1fr)', gap: '24px', marginBottom: '28px' }}>
         
         {/* Active Protocols List with Cycle Tracking */}
         <div>
-          <div className="glass-panel">
+          <div className="card" style={{ padding: '22px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '700' }}>
-                Active Compounds ({injections.length})
+              <h3 style={{ fontSize: '19px', fontWeight: '800', color: '#fff' }}>
+                Active Protocols ({injections.length})
               </h3>
               <button
-                className="btn-secondary"
-                style={{ fontSize: '11px', padding: '4px 10px' }}
+                className="btn btn-secondary"
+                style={{ fontSize: '12.5px', padding: '6px 12px', minHeight: '36px' }}
                 onClick={handleOpenAddModal}
               >
                 + Add Another
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {injections.map((item) => (
                 <div
                   key={item.id}
                   style={{
                     background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid var(--border-glass)',
-                    borderRadius: '12px',
-                    padding: '18px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '14px',
+                    padding: '20px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '12px',
+                    gap: '14px',
                     position: 'relative',
                     overflow: 'hidden'
                   }}
                 >
-                  <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: item.color || '#00f2fe' }} />
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: item.color || 'var(--accent-cyan)' }} />
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#fff' }}>{item.name}</h4>
-                        <span className="tag-badge tag-cyan" style={{ fontSize: '10px' }}>{item.category}</span>
+                        <h4 style={{ fontSize: '17px', fontWeight: '800', color: '#fff' }}>{item.name}</h4>
+                        <span className="badge badge-cyan" style={{ fontSize: '10.5px' }}>{item.category}</span>
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        Frequency: <strong style={{ color: 'var(--text-main)' }}>{item.frequency}</strong> | Timing: <strong style={{ color: 'var(--neon-amber)' }}>{item.timing}</strong>
+                      <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '5px' }}>
+                        Frequency: <strong style={{ color: '#fff' }}>{item.frequency}</strong> | Timing: <strong style={{ color: 'var(--accent-amber)' }}>{item.timing}</strong>
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: item.color || '#00f2fe' }}>
+                      <div style={{ fontSize: '20px', fontWeight: '800', fontFamily: 'var(--font-mono)', color: item.color || 'var(--accent-cyan)' }}>
                         {item.dose}
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-dark)', fontFamily: 'var(--font-mono)' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                         ({item.units} IU on Syringe)
                       </div>
                     </div>
                   </div>
 
                   {/* Cycle Tracking HUD on Card */}
-                  <div style={{ background: 'rgba(0,0,0,0.25)', padding: '8px 12px', borderRadius: '8px', fontSize: '11.5px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px 14px', borderRadius: '10px', fontSize: '12.5px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
                     <span>🔄 Cycle: <strong style={{ color: 'var(--accent-cyan)' }}>{item.cycle_duration || 30} Days</strong> (Started: {item.start_date || 'Active'})</span>
-                    <span>{item.cycle_days_on || 5}d ON / {item.cycle_days_off || 2}d OFF</span>
+                    <span>Schedule: <strong style={{ color: 'var(--accent-sage)' }}>{item.cycle_days_on || 7}d ON / {item.cycle_days_off !== undefined ? item.cycle_days_off : 0}d OFF</strong></span>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid var(--border-glass)' }}>
-                    <div style={{ fontSize: '11.5px', color: 'var(--text-dark)' }}>
-                      Last Injected: <strong style={{ color: 'var(--text-muted)' }}>{item.lastTaken || 'Recently'}</strong> | Site: <strong style={{ color: 'var(--text-muted)' }}>{item.site || 'Abdomen'}</strong>
+                  {/* Prominent Action Buttons */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      Last Taken: <strong style={{ color: '#fff' }}>{item.lastTaken || 'Recently'}</strong> | Site: <strong style={{ color: 'var(--accent-cyan)' }}>{item.site || 'Abdomen'}</strong>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
                       <button
-                        className="btn-primary"
-                        style={{ padding: '6px 14px', fontSize: '12px' }}
+                        className="btn btn-primary"
+                        style={{ padding: '8px 18px', fontSize: '13.5px', minHeight: '40px' }}
                         onClick={() => handleLogInjection(item)}
                       >
                         ⚡ Log Dose
@@ -422,18 +436,18 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
 
                       {/* EDIT BUTTON */}
                       <button
-                        className="btn-secondary"
-                        style={{ padding: '6px 12px', fontSize: '12px', color: 'var(--neon-cyan)', borderColor: 'rgba(0, 242, 254, 0.3)' }}
+                        className="btn btn-secondary"
+                        style={{ padding: '8px 16px', fontSize: '13.5px', minHeight: '40px', color: 'var(--accent-cyan)', borderColor: 'rgba(56, 189, 248, 0.4)' }}
                         onClick={() => handleOpenEditModal(item)}
                         title="Edit Dosage, Cycle & Protocol"
                       >
-                        ✏️ Edit
+                        ✏️ Edit Protocol & Cycle
                       </button>
 
                       {/* DELETE BUTTON */}
                       <button
-                        className="btn-secondary"
-                        style={{ padding: '6px 10px', fontSize: '12px', color: 'var(--neon-crimson)' }}
+                        className="btn btn-danger"
+                        style={{ padding: '8px 14px', fontSize: '13.5px', minHeight: '40px' }}
                         onClick={() => handleDeleteCompound(item.id)}
                         title="Delete Compound"
                       >
@@ -447,13 +461,13 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
           </div>
         </div>
 
-        {/* Interactive Injection Site Rotation Map */}
-        <div className="glass-panel" style={{ border: '1px solid rgba(255, 42, 109, 0.25)' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: 'var(--neon-crimson)' }}>🎯</span> Site Rotation Matrix
+        {/* Subcutaneous Injection Site Rotation Map */}
+        <div className="card" style={{ padding: '22px', border: '1px solid rgba(244, 114, 182, 0.3)' }}>
+          <h3 style={{ fontSize: '19px', fontWeight: '800', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}>
+            <span>📍</span> Subcutaneous (SubQ) Rotation Matrix
           </h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '20px' }}>
-            Select your target area prior to logging to automatically track injection site history.
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: '1.4' }}>
+            Select your target SubQ area before administering to prevent lipohypertrophy and optimize absorption.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
@@ -464,35 +478,35 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
                   key={site.id}
                   onClick={() => { sound.playClick(); setSelectedSite(site.id); }}
                   style={{
-                    background: isSelected ? 'rgba(255, 42, 109, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                    border: isSelected ? '1px solid var(--neon-crimson)' : '1px solid var(--border-glass)',
+                    background: isSelected ? 'rgba(56, 189, 248, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                    border: isSelected ? '2px solid var(--accent-cyan)' : '1px solid var(--border)',
                     borderRadius: '10px',
                     padding: '12px',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
+                    transition: 'all 0.15s ease',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '4px'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: isSelected ? '#fff' : 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '13px', fontWeight: isSelected ? '800' : '600', color: isSelected ? '#fff' : 'var(--text-muted)' }}>
                       {site.name}
                     </span>
-                    {isSelected && <span style={{ color: 'var(--neon-crimson)', fontSize: '12px' }}>● Active</span>}
+                    {isSelected && <span style={{ color: 'var(--accent-cyan)', fontSize: '11px', fontWeight: '800' }}>● Active</span>}
                   </div>
-                  <span style={{ fontSize: '10px', color: 'var(--text-dark)' }}>{site.area}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{site.coords}</span>
                 </div>
               );
             })}
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-glass)' }}>
-            <div style={{ fontSize: '11px', color: 'var(--neon-amber)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>
-              💡 Smart Rotation Tip
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '11.5px', color: 'var(--accent-amber)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '4px' }}>
+              💡 SubQ Rotation Best Practice
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              SubQ injections absorb best into abdominal fat 2 inches away from the umbilicus. Rotate at least 1 inch away from prior injection spots.
+            <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+              Rotate between abdominal fat, lateral love handles / flanks, outer thighs, and upper gluteal subcutaneous depots. Maintain at least 1 inch distance from previous injection sites.
             </div>
           </div>
         </div>
@@ -500,15 +514,15 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
 
       {/* FULL MODAL TO ADD OR EDIT PROTOCOL WITH CYCLE TRACKING */}
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => { setIsModalOpen(false); setEditingCompoundId(null); }}>
-          <div className="modal-card" style={{ maxWidth: '780px', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop" onClick={() => { setIsModalOpen(false); setEditingCompoundId(null); }}>
+          <div className="modal-box" style={{ maxWidth: '780px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <h3 style={{ fontSize: '22px', fontWeight: '800' }}>
-                  {editingCompoundId ? '✏️ Edit Peptide Protocol & Cycle' : 'Master Peptide Library & Custom Builder'}
+                <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#fff', margin: 0 }}>
+                  {editingCompoundId ? '✏️ Edit Peptide Protocol & Cycle' : 'Master Peptide Library & Protocol Builder'}
                 </h3>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  {editingCompoundId ? 'Update your exact dosage, frequency, cycle duration, and syringe units.' : 'Search and 1-click add popular peptides or configure custom formulation cycles.'}
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                  {editingCompoundId ? 'Update your exact dosage, continuous/pulsed cycle schedule, and syringe units.' : 'Search and 1-click add popular peptides or configure custom formulation cycles.'}
                 </p>
               </div>
               <button className="modal-close" onClick={() => { setIsModalOpen(false); setEditingCompoundId(null); }}>✕</button>
@@ -521,137 +535,147 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
                   <input
                     type="text"
                     placeholder="🔍 Search compounds (KLOW, SS-31, MOTS-c, Retatrutide, PT-141, etc.)..."
-                    className="bio-input"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={librarySearch}
                     onChange={(e) => setLibrarySearch(e.target.value)}
                   />
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                  <div className="bio-label">
-                    Pre-Configured Compounds & Custom Additions ({filteredLibrary.length})
+                <div style={{ marginBottom: '22px' }}>
+                  <div className="input-label">
+                    Pre-Configured Formulations & Custom Additions ({filteredLibrary.length})
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxHeight: '240px', overflowY: 'auto', paddingRight: '4px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', maxHeight: '240px', overflowY: 'auto', paddingRight: '4px' }}>
                     {filteredLibrary.map((item, idx) => (
                       <div
                         key={idx}
                         onClick={() => handleQuickAddFromLibrary(item)}
                         style={{
-                          background: 'rgba(255,255,255,0.04)',
-                          border: '1px solid var(--border-glass)',
-                          borderRadius: '8px',
-                          padding: '10px 12px',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '10px',
+                          padding: '12px 14px',
                           cursor: 'pointer',
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          transition: 'all 0.15s'
+                          transition: 'all 0.15s ease'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--neon-cyan)'}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-glass)'}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-cyan)'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
                       >
                         <div>
-                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#fff' }}>
+                          <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff' }}>
                             {item.name.split(' (')[0]} {item.is_custom ? '⭐' : ''}
                           </div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.dose} • {item.frequency}</div>
-                          <div style={{ fontSize: '10px', color: 'var(--neon-cyan)', marginTop: '2px' }}>{item.category}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.dose} • {item.frequency}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--accent-cyan)', marginTop: '2px' }}>{item.category}</div>
                         </div>
-                        <span className="tag-badge tag-cyan" style={{ fontSize: '10px' }}>+ Add</span>
+                        <span className="badge badge-cyan" style={{ fontSize: '11px' }}>+ Add</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ textAlign: 'center', margin: '14px 0', fontSize: '12px', color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  — OR CONFIGURE CUSTOM FORMULATION & CYCLE —
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '18px', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--accent-sage)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Or Build Custom Protocol Details:
+                  </span>
                 </div>
               </>
             )}
 
+            {/* Add / Edit Form */}
             <form onSubmit={handleSaveCompoundForm}>
-              <div style={{ marginBottom: '14px' }}>
-                <label className="bio-label">Compound Name & Formulation</label>
-                <input
-                  type="text"
-                  placeholder="e.g. BPC-157 / TB-500 Blend"
-                  className="bio-input"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                 <div>
-                  <label className="bio-label">Target Dose (e.g. 500 mcg, 2.5 mg)</label>
+                  <label className="input-label">Compound Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. KLOW Blend"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="input-label">Target Dose</label>
                   <input
                     type="text"
                     placeholder="e.g. 500 mcg"
-                    className="bio-input"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={formData.dose}
                     onChange={(e) => setFormData({ ...formData, dose: e.target.value })}
                     required
                   />
                 </div>
-
                 <div>
-                  <label className="bio-label">Syringe Units on U-100 (IU)</label>
+                  <label className="input-label">Syringe Units (IU)</label>
                   <input
-                    type="text"
+                    type="number"
                     placeholder="e.g. 20"
-                    className="bio-input"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={formData.units}
                     onChange={(e) => setFormData({ ...formData, units: e.target.value })}
                   />
                 </div>
               </div>
 
-              {/* CYCLE TRACKING PARAMETERS */}
-              <div style={{ background: 'rgba(0, 242, 254, 0.04)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(0, 242, 254, 0.2)', marginBottom: '14px' }}>
-                <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--neon-cyan)', marginBottom: '10px', textTransform: 'uppercase' }}>
-                  🔄 Active Lifecycle & Cycle Tracking
+              {/* Cycle & Timing Parameters */}
+              <div style={{ background: 'rgba(56, 189, 248, 0.08)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.3)', marginBottom: '16px' }}>
+                <div style={{ fontSize: '12.5px', fontWeight: '800', color: 'var(--accent-cyan)', marginBottom: '10px' }}>
+                  🔄 Lifecycle & Dosing Schedule (7 Days On / 0 Days Off Supported)
                 </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr', gap: '10px' }}>
                   <div>
-                    <label className="bio-label">Start Date</label>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Protocol Start Date</label>
                     <input
                       type="date"
-                      className="bio-input"
+                      className="input-field"
+                      style={{ minHeight: '44px', fontSize: '14px' }}
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <label className="bio-label">Cycle Duration (Days)</label>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Total Cycle Duration (Days)</label>
                     <input
                       type="number"
                       min="7"
                       max="180"
-                      className="bio-input"
+                      className="input-field"
+                      style={{ minHeight: '44px', fontSize: '14px' }}
                       value={formData.cycle_duration}
                       onChange={(e) => setFormData({ ...formData, cycle_duration: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="bio-label">Days ON</label>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Days ON</label>
                     <input
                       type="number"
                       min="1"
                       max="7"
-                      className="bio-input"
+                      className="input-field"
+                      style={{ minHeight: '44px', fontSize: '14px' }}
                       value={formData.cycle_days_on}
                       onChange={(e) => setFormData({ ...formData, cycle_days_on: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="bio-label">Days OFF</label>
+                    <label className="input-label" style={{ fontSize: '11px' }}>Days OFF</label>
                     <input
                       type="number"
                       min="0"
                       max="7"
-                      className="bio-input"
+                      className="input-field"
+                      style={{ minHeight: '44px', fontSize: '14px' }}
                       value={formData.cycle_days_off}
                       onChange={(e) => setFormData({ ...formData, cycle_days_off: e.target.value })}
                     />
@@ -661,9 +685,10 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <div>
-                  <label className="bio-label">Administration Frequency & Schedule</label>
+                  <label className="input-label">Administration Frequency & Schedule</label>
                   <select
-                    className="bio-select"
+                    className="select-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={formData.frequency}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -700,9 +725,10 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
                 </div>
 
                 <div>
-                  <label className="bio-label">Circadian Ingestion Timing</label>
+                  <label className="input-label">Circadian Ingestion Timing</label>
                   <select
-                    className="bio-select"
+                    className="select-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={formData.timing}
                     onChange={(e) => setFormData({ ...formData, timing: e.target.value })}
                   >
@@ -718,38 +744,41 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
 
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <div>
-                  <label className="bio-label">Category / Objective</label>
+                  <label className="input-label">Category / Objective</label>
                   <input
                     type="text"
                     placeholder="Tissue Repair / Mitochondrial Longevity"
-                    className="bio-input"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="bio-label">Vials in Stock</label>
+                  <label className="input-label">Vials in Stock</label>
                   <input
                     type="text"
                     placeholder="e.g. 3"
-                    className="bio-input"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={formData.stockVials}
                     onChange={(e) => setFormData({ ...formData, stockVials: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
                 <button
                   type="button"
-                  className="btn-secondary"
+                  className="btn btn-secondary"
+                  style={{ minHeight: '46px', padding: '10px 20px', fontSize: '14px' }}
                   onClick={() => { setIsModalOpen(false); setEditingCompoundId(null); }}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary">
-                  {editingCompoundId ? '✓ Save Changes' : '+ Save to Protocol'}
+                <button type="submit" className="btn btn-primary" style={{ minHeight: '46px', padding: '10px 24px', fontSize: '14px' }}>
+                  {editingCompoundId ? '✓ Save Protocol Changes' : '+ Add Protocol to Stack'}
                 </button>
               </div>
             </form>
@@ -757,107 +786,148 @@ export default function InjectionManager({ injections, onUpdateInjections, onLog
         </div>
       )}
 
-      {/* DYNAMIC COMPOUND CREATOR MODAL (ADD TO LIBRARY) */}
+      {/* CUSTOM COMPOUND CREATOR MODAL */}
       {isCustomLibModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsCustomLibModalOpen(false)}>
-          <div className="modal-card" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop" onClick={() => setIsCustomLibModalOpen(false)}>
+          <div className="modal-box" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <h3 style={{ fontSize: '20px', fontWeight: '800' }}>
-                  🧬 Add Custom Peptide to Master Library
+                <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#fff', margin: 0 }}>
+                  🧬 Create Custom Compound for Library
                 </h3>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  Define custom compound parameters, half-life, and reconstitution parameters.
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                  Save your custom compound with reconstitution metrics to your persistent database.
                 </p>
               </div>
               <button className="modal-close" onClick={() => setIsCustomLibModalOpen(false)}>✕</button>
             </div>
 
             <form onSubmit={handleSaveCustomCompoundToLibrary} style={{ marginTop: '16px' }}>
-              <div style={{ marginBottom: '12px' }}>
-                <label className="bio-label">Compound Name</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label className="input-label">Compound Name</label>
                 <input
                   type="text"
-                  placeholder="e.g. Epitalon + GHK-Cu Hybrid"
-                  className="bio-input"
+                  placeholder="e.g. BPC-157 / TB-500 Blend"
+                  className="input-field"
+                  style={{ minHeight: '48px', fontSize: '15px' }}
                   value={customCompoundData.name}
                   onChange={(e) => setCustomCompoundData({ ...customCompoundData, name: e.target.value })}
                   required
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                 <div>
-                  <label className="bio-label">Standard Dose</label>
+                  <label className="input-label">Standard Dose</label>
                   <input
                     type="text"
-                    className="bio-input"
+                    placeholder="e.g. 500 mcg"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={customCompoundData.dose}
                     onChange={(e) => setCustomCompoundData({ ...customCompoundData, dose: e.target.value })}
                     required
                   />
                 </div>
                 <div>
-                  <label className="bio-label">Category</label>
+                  <label className="input-label">Syringe Units (IU)</label>
                   <input
-                    type="text"
-                    className="bio-input"
-                    value={customCompoundData.category}
-                    onChange={(e) => setCustomCompoundData({ ...customCompoundData, category: e.target.value })}
-                    required
+                    type="number"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
+                    value={customCompoundData.units}
+                    onChange={(e) => setCustomCompoundData({ ...customCompoundData, units: parseInt(e.target.value) || 10 })}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                 <div>
-                  <label className="bio-label">Vial (mg)</label>
+                  <label className="input-label">Frequency</label>
+                  <select
+                    className="select-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
+                    value={customCompoundData.frequency}
+                    onChange={(e) => setCustomCompoundData({ ...customCompoundData, frequency: e.target.value })}
+                  >
+                    <option value="7 Days On / 0 Days Off (Daily Continuous)">7 Days On / 0 Days Off (Daily Continuous)</option>
+                    <option value="Daily (AM)">Daily (AM)</option>
+                    <option value="Daily (PM)">Daily (PM)</option>
+                    <option value="Twice Daily (AM/PM)">Twice Daily (AM/PM)</option>
+                    <option value="6 Days On / 1 Day Off">6 Days On / 1 Day Off</option>
+                    <option value="5 Days On / 2 Days Off">5 Days On / 2 Days Off</option>
+                    <option value="Every Other Day (EOD)">Every Other Day (EOD)</option>
+                    <option value="3x / Week">3x / Week</option>
+                    <option value="Once Weekly">Once Weekly</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="input-label">Category</label>
+                  <input
+                    type="text"
+                    placeholder="Regenerative Healing"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
+                    value={customCompoundData.category}
+                    onChange={(e) => setCustomCompoundData({ ...customCompoundData, category: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                <div>
+                  <label className="input-label">Vial (mg)</label>
                   <input
                     type="number"
-                    step="0.5"
-                    className="bio-input"
+                    step="0.1"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={customCompoundData.vialMg}
                     onChange={(e) => setCustomCompoundData({ ...customCompoundData, vialMg: parseFloat(e.target.value) || 5 })}
                   />
                 </div>
                 <div>
-                  <label className="bio-label">BAC Water (mL)</label>
+                  <label className="input-label">BAC Water (mL)</label>
                   <input
                     type="number"
                     step="0.1"
-                    className="bio-input"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={customCompoundData.bacWaterMl}
                     onChange={(e) => setCustomCompoundData({ ...customCompoundData, bacWaterMl: parseFloat(e.target.value) || 2.0 })}
                   />
                 </div>
                 <div>
-                  <label className="bio-label">Half-Life (Hours)</label>
+                  <label className="input-label">Half-Life (Hours)</label>
                   <input
                     type="number"
-                    step="0.5"
-                    className="bio-input"
+                    step="0.1"
+                    className="input-field"
+                    style={{ minHeight: '48px', fontSize: '15px' }}
                     value={customCompoundData.halfLifeHours}
                     onChange={(e) => setCustomCompoundData({ ...customCompoundData, halfLifeHours: parseFloat(e.target.value) || 4.0 })}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                 <button
                   type="button"
-                  className="btn-secondary"
+                  className="btn btn-secondary"
+                  style={{ minHeight: '46px', padding: '10px 18px', fontSize: '14px' }}
                   onClick={() => setIsCustomLibModalOpen(false)}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary">
-                  ✓ Add to Database Library
+                <button type="submit" className="btn btn-primary" style={{ minHeight: '46px', padding: '10px 22px', fontSize: '14px' }}>
+                  ✓ Save to Library & Activate
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }

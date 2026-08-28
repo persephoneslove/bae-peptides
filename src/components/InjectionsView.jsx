@@ -4,12 +4,14 @@ import { sound } from '../utils/audio';
 const COMMON_SITES = [
   'Left Abdomen (SubQ)',
   'Right Abdomen (SubQ)',
-  'Left Deltoid (Shoulder)',
-  'Right Deltoid (Shoulder)',
-  'Left Glute (Ventrogluteal)',
-  'Right Glute (Ventrogluteal)',
-  'Left Thigh (Quad)',
-  'Right Thigh (Quad)'
+  'Left Love Handle / Flank (SubQ)',
+  'Right Love Handle / Flank (SubQ)',
+  'Left Thigh (SubQ)',
+  'Right Thigh (SubQ)',
+  'Left Glute / Buttock (SubQ)',
+  'Right Glute / Buttock (SubQ)',
+  'Left Deltoid / Arm (SubQ)',
+  'Right Deltoid / Arm (SubQ)'
 ];
 
 const POPULAR_PEPTIDES = [
@@ -206,24 +208,24 @@ export default function InjectionsView({ injections, onUpdateInjections, onLogDo
                 Site: {item.site || selectedSite} • Schedule: {item.cycle_days_on || 5}d ON / {item.cycle_days_off || 2}d OFF
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                   className="btn btn-primary"
-                  style={{ padding: '8px 18px', fontSize: '13px' }}
+                  style={{ padding: '10px 20px', fontSize: '14px', minHeight: '42px' }}
                   onClick={() => handleLog(item)}
                 >
                   ⚡ Log Dose
                 </button>
                 <button
                   className="btn btn-secondary"
-                  style={{ padding: '8px 14px', fontSize: '13px' }}
+                  style={{ padding: '10px 18px', fontSize: '14px', minHeight: '42px', color: 'var(--accent-cyan)' }}
                   onClick={() => handleOpenEdit(item)}
                 >
                   ✏️ Edit Protocol & Cycle
                 </button>
                 <button
                   className="btn btn-danger"
-                  style={{ padding: '8px 12px', fontSize: '13px' }}
+                  style={{ padding: '10px 16px', fontSize: '14px', minHeight: '42px' }}
                   onClick={() => handleDelete(item.id)}
                   title="Delete"
                 >

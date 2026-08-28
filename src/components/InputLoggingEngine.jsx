@@ -6,12 +6,14 @@ import { getLocalDateKey, createLocalTimestamp, formatDisplayDateTime } from '..
 const INJECTION_SITES = [
   { id: 'ab-left', name: 'Left Abdomen (SubQ)', area: 'Abdominal', coords: 'Left Umbilicus 2in' },
   { id: 'ab-right', name: 'Right Abdomen (SubQ)', area: 'Abdominal', coords: 'Right Umbilicus 2in' },
-  { id: 'delt-left', name: 'Left Deltoid (IM / SubQ)', area: 'Shoulder', coords: 'Acromion Lateral' },
-  { id: 'delt-right', name: 'Right Deltoid (IM / SubQ)', area: 'Shoulder', coords: 'Acromion Lateral' },
-  { id: 'glute-left', name: 'Left Ventrogluteal (IM)', area: 'Gluteal', coords: 'Upper Outer Quadrant' },
-  { id: 'glute-right', name: 'Right Ventrogluteal (IM)', area: 'Gluteal', coords: 'Upper Outer Quadrant' },
-  { id: 'quad-left', name: 'Left Vastus Lateralis (IM)', area: 'Thigh', coords: 'Mid-Outer Thigh' },
-  { id: 'quad-right', name: 'Right Vastus Lateralis (IM)', area: 'Thigh', coords: 'Mid-Outer Thigh' }
+  { id: 'flank-left', name: 'Left Love Handle / Flank (SubQ)', area: 'Love Handle / Flank', coords: 'Lateral Iliac Crest Left' },
+  { id: 'flank-right', name: 'Right Love Handle / Flank (SubQ)', area: 'Love Handle / Flank', coords: 'Lateral Iliac Crest Right' },
+  { id: 'thigh-left', name: 'Left Thigh (SubQ)', area: 'Thigh', coords: 'Anterior / Outer Thigh Left' },
+  { id: 'thigh-right', name: 'Right Thigh (SubQ)', area: 'Thigh', coords: 'Anterior / Outer Thigh Right' },
+  { id: 'glute-left', name: 'Left Glute / Buttock (SubQ)', area: 'Gluteal', coords: 'Upper Outer Quadrant Left' },
+  { id: 'glute-right', name: 'Right Glute / Buttock (SubQ)', area: 'Gluteal', coords: 'Upper Outer Quadrant Right' },
+  { id: 'delt-left', name: 'Left Deltoid / Arm (SubQ)', area: 'Upper Arm', coords: 'Tricep / Lateral Deltoid Left' },
+  { id: 'delt-right', name: 'Right Deltoid / Arm (SubQ)', area: 'Upper Arm', coords: 'Tricep / Lateral Deltoid Right' }
 ];
 
 const SKIN_SENSITIVITY_OPTIONS = [
